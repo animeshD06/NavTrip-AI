@@ -7,6 +7,9 @@ import 'package:provider/provider.dart';
 import '../models/itinerary.dart';
 import '../models/tourist_place.dart';
 import '../providers/trip_planner_controller.dart';
+import '../services/api_client.dart';
+import '../services/ar_exploration_service.dart';
+import '../services/geofencing_voice_tour_service.dart';
 import '../services/voice_narration_service.dart';
 
 class TouristMapScreen extends StatefulWidget {
@@ -26,20 +29,27 @@ class TouristMapScreen extends StatefulWidget {
 class _TouristMapScreenState extends State<TouristMapScreen> {
   final _mapController = MapController();
   final _voiceNarrationService = VoiceNarrationService();
+  late final GeofencingVoiceTourService _geofencingVoiceTourService;
+  final _arExplorationService = ArExplorationService();
 
   LatLng? _currentLocation;
   String? _locationError;
   TouristPlace? _selectedPlace;
+  VoiceTourSettings _voiceTourSettings = const VoiceTourSettings();
 
   @override
   void initState() {
     super.initState();
+    _geofencingVoiceTourService = GeofencingVoiceTourService(
+      _voiceNarrationService,
+    );
     _selectedPlace = widget.initialPlace;
     _loadCurrentLocation();
   }
 
   @override
   void dispose() {
+    _geofencingVoiceTourService.dispose();
     _voiceNarrationService.dispose();
     super.dispose();
   }
@@ -48,6 +58,7 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
   Widget build(BuildContext context) {
     final controller = context.watch<TripPlannerController>();
     final places = controller.places;
+    _geofencingVoiceTourService.updatePlaces(places);
     final routePlaces = widget.routeDay?.places ?? const <ItineraryPlace>[];
     final routePoints = routePlaces
         .map((place) => LatLng(place.latitude, place.longitude))
@@ -70,6 +81,11 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
               : 'Day ${widget.routeDay!.dayNumber} route',
         ),
         actions: [
+          IconButton(
+            tooltip: 'AR exploration',
+            onPressed: () => _startArExploration(context, places),
+            icon: const Icon(Icons.view_in_ar),
+          ),
           IconButton(
             tooltip: 'Stop narration',
             onPressed: _voiceNarrationService.stop,
@@ -160,6 +176,16 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
             Positioned(
               left: 12,
               right: 12,
+              top: 12,
+              child: _VoiceTourControls(
+                settings: _voiceTourSettings,
+                onChanged: _updateVoiceTourSettings,
+              ),
+            ),
+          if (places.isNotEmpty)
+            Positioned(
+              left: 12,
+              right: 12,
               bottom: _locationError == null ? 12 : 96,
               child: _MapPlaceStrip(
                 places: places,
@@ -192,13 +218,61 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
     );
   }
 
-  void _selectPlace(TouristPlace place) {
+  Future<void> _selectPlace(TouristPlace place) async {
     setState(() {
       _selectedPlace = place;
     });
 
     _mapController.move(LatLng(place.latitude, place.longitude), 15);
-    _voiceNarrationService.speakPlace(place);
+
+    String? cachedNarration;
+
+    try {
+      final response = await context.read<ApiClient>().fetchNarration(
+            placeId: place.id,
+            mode: _voiceTourSettings.mode.name,
+            language: _voiceTourSettings.language,
+          );
+      cachedNarration = response['content'] as String?;
+    } catch (_) {
+      cachedNarration = null;
+    }
+
+    await _voiceNarrationService.speakPlace(
+      place,
+      mode: _voiceTourSettings.mode,
+      language: _voiceTourSettings.language,
+      cachedNarration: cachedNarration,
+    );
+  }
+
+  Future<void> _updateVoiceTourSettings(VoiceTourSettings settings) async {
+    setState(() {
+      _voiceTourSettings = settings;
+    });
+
+    await _geofencingVoiceTourService.updateSettings(settings);
+  }
+
+  Future<void> _startArExploration(
+    BuildContext context,
+    List<TouristPlace> places,
+  ) async {
+    final result = await _arExplorationService.startSession(
+      visiblePlaces: places,
+    );
+
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result.message)),
+    );
+
+    if (!result.supported && result.nearestPlace != null) {
+      await _selectPlace(result.nearestPlace!);
+    }
   }
 
   Future<void> _loadCurrentLocation() async {
@@ -267,7 +341,11 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
                 spacing: 8,
                 children: [
                   FilledButton.icon(
-                    onPressed: () => _voiceNarrationService.speakPlace(place),
+                    onPressed: () => _voiceNarrationService.speakPlace(
+                      place,
+                      mode: _voiceTourSettings.mode,
+                      language: _voiceTourSettings.language,
+                    ),
                     icon: const Icon(Icons.volume_up),
                     label: const Text('Narrate'),
                   ),
@@ -282,6 +360,83 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
           ),
         );
       },
+    );
+  }
+}
+
+class _VoiceTourControls extends StatelessWidget {
+  const _VoiceTourControls({
+    required this.settings,
+    required this.onChanged,
+  });
+
+  final VoiceTourSettings settings;
+  final ValueChanged<VoiceTourSettings> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      elevation: 3,
+      color: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Wrap(
+          spacing: 10,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            FilterChip(
+              avatar: const Icon(Icons.record_voice_over, size: 18),
+              label: const Text('Auto guide'),
+              selected: settings.enabled,
+              onSelected: (value) {
+                onChanged(settings.copyWith(enabled: value));
+              },
+            ),
+            DropdownButton<int>(
+              value: settings.radiusMeters,
+              underline: const SizedBox.shrink(),
+              items: const [
+                DropdownMenuItem(value: 50, child: Text('50m')),
+                DropdownMenuItem(value: 100, child: Text('100m')),
+                DropdownMenuItem(value: 200, child: Text('200m')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  onChanged(settings.copyWith(radiusMeters: value));
+                }
+              },
+            ),
+            DropdownButton<NarrationMode>(
+              value: settings.mode,
+              underline: const SizedBox.shrink(),
+              items: const [
+                DropdownMenuItem(
+                  value: NarrationMode.short,
+                  child: Text('Short'),
+                ),
+                DropdownMenuItem(
+                  value: NarrationMode.medium,
+                  child: Text('Medium'),
+                ),
+                DropdownMenuItem(
+                  value: NarrationMode.detailed,
+                  child: Text('Detailed'),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  onChanged(settings.copyWith(mode: value));
+                }
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
