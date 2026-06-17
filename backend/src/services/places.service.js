@@ -1,4 +1,4 @@
-import { touristPlaces } from '../data/tourist-places.js';
+import { touristPlaces } from '../data/locations-catalog.js';
 import { hasDatabaseConfig } from '../config/db.js';
 import {
   findPlaceByIdFromDatabase,

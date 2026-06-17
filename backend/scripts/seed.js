@@ -1,7 +1,10 @@
 import 'dotenv/config';
 
 import { pool } from '../src/config/db.js';
-import { touristPlaces } from '../src/data/tourist-places.js';
+import {
+  importedLocationsCount,
+  touristPlaces,
+} from '../src/data/locations-catalog.js';
 
 const upsertPlace = `
   INSERT INTO tourist_places (
@@ -49,7 +52,10 @@ try {
     ]);
   }
 
-  console.log(`Database seed applied. Upserted ${touristPlaces.length} places.`);
+  console.log(
+    `Database seed applied. Upserted ${touristPlaces.length} places `
+      + `(${importedLocationsCount} imported from locations.md).`,
+  );
 } finally {
   await pool.end();
 }
