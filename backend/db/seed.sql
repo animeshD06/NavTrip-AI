@@ -1,0 +1,2 @@
+-- Seed data is maintained in ../src/data/tourist-places.js.
+-- Run `npm run db:seed` from the backend directory to upsert the catalog.
