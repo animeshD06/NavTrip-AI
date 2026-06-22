@@ -3,6 +3,8 @@ node_modules/
 .DS_Store
 *.log
 tools/flutter/
+*.pid
+*.md
 
 # Flutter/Dart
 .dart_tool/
