@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .paper-grain {
+            background-image: url("https://www.transparenttextures.com/patterns/felt.png");
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        .ring-shadow {
+            box-shadow: 6px 6px 15px -3px rgba(0, 0, 0, 0.1), 2px 2px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .taped-effect::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 60px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        /* Custom Scrollbar for the journal feel */
+        .journal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .journal-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .journal-scroll::-webkit-scrollbar-thumb {
+            background: #dec0b7;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#f9f9f8",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#ffbda9",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9f8",
+                        "on-tertiary-container": "#cdcbca",
+                        "secondary-container": "#e9e1db",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#ccc5c0",
+                        "inverse-on-surface": "#f1f1f0",
+                        "secondary": "#625e59",
+                        "on-surface": "#1a1c1c",
+                        "on-surface-variant": "#57423c",
+                        "inverse-surface": "#2f3130",
+                        "tertiary-fixed": "#e4e2e1",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#565656",
+                        "outline": "#8b716a",
+                        "primary": "#781f00",
+                        "outline-variant": "#dec0b7",
+                        "primary-container": "#9a3412",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb59f",
+                        "surface-container-low": "#f4f4f3",
+                        "primary-fixed": "#ffdbd1",
+                        "on-primary-fixed": "#3a0a00",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-container": "#68635f",
+                        "surface-tint": "#a53c19",
+                        "primary-fixed-dim": "#ffb59f",
+                        "secondary-fixed": "#e9e1db",
+                        "on-tertiary-fixed": "#1b1c1b",
+                        "surface-container-highest": "#e2e2e2",
+                        "tertiary": "#3f3f3e",
+                        "surface-container": "#eeeeed",
+                        "on-primary-fixed-variant": "#842503",
+                        "surface": "#f9f9f8",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "on-secondary-fixed-variant": "#4a4642",
+                        "surface-dim": "#dadad9",
+                        "on-secondary-fixed": "#1e1b18"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Instrument Serif"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Instrument Serif"],
+                        "body-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-sm": ["Instrument Serif"],
+                        "headline-md": ["Instrument Serif"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["36px", {"lineHeight": "40px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-sm": ["24px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["32px", {"lineHeight": "36px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed overflow-hidden h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface-bright dark:bg-surface-dim shadow-sm docked full-width top-0 z-50">
+<div class="flex justify-between items-center px-margin-desktop py-4 w-full max-w-7xl mx-auto">
+<div class="font-display-lg text-display-lg text-primary dark:text-inverse-primary tracking-tight">NavTrip-AI</div>
+<div class="hidden md:flex items-center gap-gutter">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors duration-200 font-body-md" href="#">Explore</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary transition-colors duration-200 font-body-md" href="#">Planner</a>
+<a class="text-primary dark:text-inverse-primary font-bold border-b-2 border-primary dark:border-inverse-primary pb-1 font-body-md" href="#">My Trips</a>
+</div>
+<button class="bg-primary-container text-on-primary px-6 py-2 rounded-full font-label-md hover:scale-105 active:scale-95 transition-all">Sign In</button>
+</div>
+</nav>
+<!-- Main Content Canvas (Split Screen) -->
+<main class="flex-grow flex flex-col md:flex-row relative overflow-hidden">
+<!-- Map View Area (Left) -->
+<section class="flex-grow relative h-[50vh] md:h-auto overflow-hidden bg-surface-container-low">
+<div class="absolute inset-0 paper-grain"></div>
+<!-- Illustrated Map Container -->
+<div class="absolute inset-0 flex items-center justify-center p-gutter">
+<div class="relative w-full h-full max-w-5xl rounded-lg overflow-hidden shadow-2xl border-[12px] border-white ring-shadow rotate-[-0.5deg]">
+<div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAngC9JDQGMSNx15EMLQFFMSV6_afhzhe0gsUnA3W2D37qP8D4VaBuHRAhRh1GNkIGKNAVPox2kZDvFWtF_bnrrMarvq1BUE5hJ6RhILGtys0lPgtkfGNWtgnHX1XCn8TAf9vPqmJZOtATmX5I1F0pEE8xiH1PpXey5F8EyICaoeOU2BIVN7J1C6UtBXTDQ3bbyycNmac6kl9uNbMtpFQeMepyq4UcXHFjdw9SsDZashVh6O5sh4Ce931jVjynJynYLFQ39kSceNV1q')"></div>
+<!-- Interactive Pins (Numbered Terracotta) -->
+<div class="absolute top-1/4 left-1/3 group cursor-pointer">
+<div class="bg-primary-container text-on-primary w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform">1</div>
+<div class="hidden group-hover:block absolute top-10 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded shadow-md whitespace-nowrap text-xs font-bold border border-outline-variant">Sunrise Cliffs</div>
+</div>
+<div class="absolute top-1/2 left-1/2 group cursor-pointer">
+<div class="bg-primary-container text-on-primary w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform">2</div>
+<div class="hidden group-hover:block absolute top-10 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded shadow-md whitespace-nowrap text-xs font-bold border border-outline-variant">Azure Bay</div>
+</div>
+<div class="absolute bottom-1/4 right-1/3 group cursor-pointer">
+<div class="bg-primary-container text-on-primary w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg transform group-hover:scale-110 transition-transform">3</div>
+<div class="hidden group-hover:block absolute top-10 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded shadow-md whitespace-nowrap text-xs font-bold border border-outline-variant">Lighthouse Peak</div>
+</div>
+</div>
+</div>
+<!-- Map Controls -->
+<div class="absolute bottom-stack-lg left-stack-lg flex flex-col gap-2">
+<button class="bg-white p-2 rounded-full shadow-md text-primary hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="bg-white p-2 rounded-full shadow-md text-primary hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+</div>
+</section>
+<!-- Sidebar Timeline (Right) -->
+<aside class="w-full md:w-[450px] bg-surface flex flex-col border-l border-outline-variant relative overflow-hidden">
+<div class="absolute inset-0 paper-grain"></div>
+<header class="p-stack-lg relative z-10">
+<div class="flex justify-between items-end mb-stack-sm">
+<h1 class="font-display-lg text-display-lg text-primary leading-tight">Coastal Charm</h1>
+<span class="text-on-surface-variant font-label-md italic mb-2 underline decoration-dotted">Sept 12 - 15</span>
+</div>
+<div class="h-1 w-24 bg-primary-container rounded-full"></div>
+</header>
+<!-- Scrollable Timeline -->
+<div class="flex-grow overflow-y-auto journal-scroll px-stack-lg pb-margin-desktop relative z-10">
+<div class="relative">
+<!-- Timeline Vertical Spine -->
+<div class="absolute left-[15px] top-0 bottom-0 w-[2px] bg-primary-container/30"></div>
+<!-- Timeline Item 1 -->
+<div class="relative pl-12 mb-stack-lg">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-surface-bright border-2 border-primary-container flex items-center justify-center ring-2 ring-surface z-10">
+<span class="material-symbols-outlined text-primary text-[18px]">photo_camera</span>
+</div>
+<div class="space-y-1">
+<p class="text-on-surface-variant font-caption uppercase tracking-widest">08:30 AM</p>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Sunrise Cliffs</h3>
+<p class="text-on-surface-variant font-body-md italic">Capture the first light on the jagged rocks. Perfect for sketches.</p>
+<div class="mt-2 p-1 bg-white border border-outline-variant shadow-sm rotate-1 w-fit ring-shadow">
+<div class="w-32 h-20 bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover grayscale opacity-80" data-alt="A vintage style black and white polaroid of a misty morning over a rocky cliffside, hand drawn texture, film grain, aesthetic travel journal photo." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIsRauEc2BwXlWZtsnFtfJoRg8qfRSfC-EF7CYERPXOvYLoB3jDSs6QJi8nCU1MvdGTtTWUXtUZGX0WoR6vDmqvwGPtcyV_YhSu9GLKv2Lhp8MXUUIP5qmjXuM0Omzs3NZ0cnZUnooV-LTgWLFsqJOpbhY1Dbby7bcbM1au43dXCyJ1MARrUFnLcL-iRcyiOhCCg06ZQg8s5Aj-F9aHbQD0mHT4Fta1-diZHqp7f0nWX2TFE43pSmiEg-LBkXJvqITVwavmbYG1W5j"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Timeline Item 2 -->
+<div class="relative pl-12 mb-stack-lg">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-surface-bright border-2 border-primary-container flex items-center justify-center ring-2 ring-surface z-10">
+<span class="material-symbols-outlined text-primary text-[18px]">restaurant</span>
+</div>
+<div class="space-y-1">
+<p class="text-on-surface-variant font-caption uppercase tracking-widest">12:45 PM</p>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">The Salted Anchor</h3>
+<p class="text-on-surface-variant font-body-md">Lunch by the bay. Famous for their local crab cakes and seaside view.</p>
+</div>
+</div>
+<!-- Timeline Item 3 (Sticky Note Style) -->
+<div class="relative pl-12 mb-stack-lg">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-surface-bright border-2 border-primary-container flex items-center justify-center ring-2 ring-surface z-10">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+</div>
+<div class="bg-[#fef9c3] p-stack-md rounded shadow-md -rotate-1 relative overflow-hidden border-b-2 border-r-2 border-yellow-200">
+<span class="material-symbols-outlined absolute top-2 right-2 text-yellow-600 opacity-30">push_pin</span>
+<p class="text-on-surface-variant font-caption uppercase tracking-widest mb-1">Reminder</p>
+<p class="font-body-md text-on-surface italic leading-relaxed">Don't forget to pick up the physical map from the visitor center! The coastal wind can be tricky for digital signals.</p>
+</div>
+</div>
+<!-- Timeline Item 4 -->
+<div class="relative pl-12 mb-stack-lg">
+<div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-surface-bright border-2 border-primary-container flex items-center justify-center ring-2 ring-surface z-10">
+<span class="material-symbols-outlined text-primary text-[18px]">castle</span>
+</div>
+<div class="space-y-1">
+<p class="text-on-surface-variant font-caption uppercase tracking-widest">03:00 PM</p>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Azure Bay Lighthouse</h3>
+<p class="text-on-surface-variant font-body-md">Climb the 120 steps for the panoramic view of the archipelago.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Panel Footer (Actions) -->
+<div class="p-6 border-t border-dotted border-outline-variant bg-surface-container-low flex gap-3">
+<button class="flex-grow flex items-center justify-center gap-2 border-1.5 border-on-surface px-4 py-2 rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+<span class="font-label-md">Edit Day</span>
+</button>
+<button class="bg-primary text-on-primary p-2 rounded-full shadow-lg hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</aside>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<div class="md:hidden">
+<nav class="fixed bottom-stack-md left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] flex justify-around items-center px-6 py-3 z-50 bg-tertiary dark:bg-tertiary-container shadow-lg rounded-full">
+<a class="flex flex-col items-center justify-center text-on-tertiary" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-md-mobile">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-tertiary" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-label-md-mobile">Explore</span>
+</a>
+<button class="flex flex-col items-center justify-center text-primary-fixed-dim -mt-8 bg-primary rounded-full p-4 shadow-xl scale-95">
+<span class="material-symbols-outlined">add</span>
+</button>
+<a class="flex flex-col items-center justify-center text-primary-fixed" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="text-label-md-mobile">Trips</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-tertiary" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-label-md-mobile">Profile</span>
+</a>
+</nav>
+</div>
+<!-- Floating Action Button (FAB) - Contextual -->
+<button class="fixed bottom-10 right-10 hidden md:flex items-center justify-center w-14 h-14 bg-primary-container text-on-primary rounded-full shadow-2xl hover:scale-110 transition-transform active:scale-95 group z-40">
+<span class="material-symbols-outlined">add_location</span>
+<span class="absolute right-full mr-4 bg-on-surface text-surface px-3 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity font-label-md">Add Stop</span>
+</button>
+<script>
+        // Micro-interaction for the timeline items
+        document.querySelectorAll('.relative.pl-12').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const ring = item.querySelector('.border-primary-container');
+                if(ring) ring.classList.add('bg-primary-fixed');
+            });
+            item.addEventListener('mouseleave', () => {
+                const ring = item.querySelector('.border-primary-container');
+                if(ring) ring.classList.remove('bg-primary-fixed');
+            });
+        });
+    </script>
+</body></html>

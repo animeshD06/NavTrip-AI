@@ -1,9 +1,14 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/trip_planner_controller.dart';
+import 'screens/dashboard_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/itinerary_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/tourist_map_screen.dart';
 import 'services/api_client.dart';
+import 'theme/navtrip_theme.dart';
 
 void main() {
   runApp(const NavTripApp());
@@ -11,7 +16,7 @@ void main() {
 
 class NavTripApp extends StatelessWidget {
   const NavTripApp({
-    this.loadPlacesOnStart = true,
+    this.loadPlacesOnStart = false,
     super.key,
   });
 
@@ -34,14 +39,15 @@ class NavTripApp extends StatelessWidget {
       child: MaterialApp(
         title: 'NavTrip AI',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xff0f766e),
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
-        home: HomeScreen(loadPlacesOnStart: loadPlacesOnStart),
+        theme: NavTripStyles.theme(),
+        routes: {
+          '/': (_) => HomeScreen(loadPlacesOnStart: loadPlacesOnStart),
+          '/login': (_) => const LoginScreen(),
+          '/dashboard': (_) => const DashboardScreen(),
+          '/trip-details': (_) => const ItineraryScreen(),
+          '/trip-map': (_) => const TouristMapScreen(),
+        },
+        initialRoute: '/',
       ),
     );
   }
