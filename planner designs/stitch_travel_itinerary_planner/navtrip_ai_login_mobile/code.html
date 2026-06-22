@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - NavTrip-AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#f9f9f8",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-container": "#ffbda9",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9f8",
+                        "on-tertiary-container": "#cdcbca",
+                        "secondary-container": "#e9e1db",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#ccc5c0",
+                        "inverse-on-surface": "#f1f1f0",
+                        "secondary": "#625e59",
+                        "on-surface": "#1a1c1c",
+                        "on-surface-variant": "#57423c",
+                        "inverse-surface": "#2f3130",
+                        "tertiary-fixed": "#e4e2e1",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#565656",
+                        "outline": "#8b716a",
+                        "primary": "#781f00",
+                        "outline-variant": "#dec0b7",
+                        "primary-container": "#9a3412",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb59f",
+                        "surface-container-low": "#f4f4f3",
+                        "primary-fixed": "#ffdbd1",
+                        "on-primary-fixed": "#3a0a00",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-container": "#68635f",
+                        "surface-tint": "#a53c19",
+                        "primary-fixed-dim": "#ffb59f",
+                        "secondary-fixed": "#e9e1db",
+                        "on-tertiary-fixed": "#1b1c1b",
+                        "surface-container-highest": "#e2e2e2",
+                        "tertiary": "#3f3f3e",
+                        "surface-container-high": "#e8e8e7",
+                        "on-background": "#1a1c1c",
+                        "surface-container": "#eeeeed",
+                        "on-primary-fixed-variant": "#842503",
+                        "surface": "#f9f9f8",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "on-secondary-fixed-variant": "#4a4642",
+                        "surface-dim": "#dadad9",
+                        "on-secondary-fixed": "#1e1b18"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "stack-sm": "8px",
+                        "stack-lg": "32px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Instrument Serif"],
+                        "label-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Instrument Serif"],
+                        "body-lg": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-sm": ["Instrument Serif"],
+                        "headline-md": ["Instrument Serif"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["36px", {"lineHeight": "40px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-sm": ["24px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["32px", {"lineHeight": "36px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .paper-texture {
+            background-color: #f9f9f8;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+        }
+        .rotated-element {
+            transform: rotate(-0.8deg);
+        }
+        .input-underline {
+            border: none;
+            border-bottom: 1.5px solid #ccc5c0;
+            background: transparent !important;
+            border-radius: 0 !important;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .input-underline:focus {
+            outline: none;
+            box-shadow: none;
+            border-bottom-color: #9a3412;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ring-binder-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #9a3412;
+            background-color: #f9f9f8;
+            border-radius: 50%;
+            position: absolute;
+            left: -7px;
+        }
+        .timeline-spine {
+            width: 2px;
+            background-color: #9a3412;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 20px;
+        }
+    </style>
+</head>
+<body class="bg-surface-dim min-h-screen flex flex-col font-body-md text-on-surface antialiased overflow-x-hidden">
+<!-- Top Visual Section -->
+<header class="relative h-[40vh] w-full overflow-hidden shrink-0">
+<div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBF0XU3AL3w_e-ZuAMqI7naht3rDkZdQvuvPqu6bd9XrMhmQSQIMVZ8mg4mCcmtdJEbLljiiQr-ggnLSSnHGtKNqATWqyZ6mAZgn16MjURSw-9cwJmIcZ_lGdokYD5p6RlrxowTfj38oWvCpN7bMvOxgqTsVgoq17ZuoL0YQeQ2q88ntdXlwKYtsG2fPn8Q_8Oar3UVjsgG_s06EcKM3TbmEtH1mJBVehqXcpvhKvec4xjCtw0FsGYKc1egfIr-5brhv1fJN4PDxd5r');">
+<!-- Overlay to ensure logo legibility if needed -->
+<div class="absolute inset-0 bg-black/5"></div>
+</div>
+<!-- Branding -->
+<div class="relative z-10 h-full flex flex-col items-center justify-center p-margin-mobile">
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-white drop-shadow-lg tracking-tight">NavTrip-AI</h1>
+<p class="font-body-md text-white/90 italic mt-2 drop-shadow-md">Curating your next heirloom journey</p>
+</div>
+<!-- Paper Edge Decorative Element -->
+<div class="absolute bottom-0 left-0 right-0 h-8 bg-surface-bright" style="clip-path: polygon(0 100%, 100% 100%, 100% 0, 95% 40%, 90% 0, 85% 40%, 80% 0, 75% 40%, 70% 0, 65% 40%, 60% 0, 55% 40%, 50% 0, 45% 40%, 40% 0, 35% 40%, 30% 0, 25% 40%, 20% 0, 15% 40%, 10% 0, 5% 40%, 0 0);"></div>
+</header>
+<!-- Main Login Content -->
+<main class="flex-grow flex flex-col items-center px-margin-mobile -mt-4 relative z-20 pb-stack-lg">
+<div class="paper-texture w-full max-w-md p-stack-lg rounded-xl rotated-element">
+<div class="mb-stack-lg text-center">
+<h2 class="font-headline-sm text-headline-sm text-primary mb-1">Welcome Back</h2>
+<p class="font-body-md text-on-surface-variant">Open your digital travel journal</p>
+</div>
+<!-- Login Form -->
+<form action="#" class="space-y-stack-lg" onsubmit="event.preventDefault();">
+<div class="relative">
+<label class="block font-label-md text-on-surface-variant mb-1 ml-0.5" for="email">Email Address</label>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-outline mr-3">mail</span>
+<input class="input-underline w-full font-body-md text-on-surface py-2 focus:placeholder-transparent transition-all" id="email" name="email" placeholder="explorer@journal.com" type="email"/>
+</div>
+</div>
+<div class="relative">
+<label class="block font-label-md text-on-surface-variant mb-1 ml-0.5" for="password">Secret Key</label>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-outline mr-3">lock</span>
+<input class="input-underline w-full font-body-md text-on-surface py-2 focus:placeholder-transparent transition-all" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div class="flex items-center justify-between py-2">
+<label class="flex items-center space-x-2 cursor-pointer">
+<input class="w-4 h-4 rounded border-outline text-primary-container focus:ring-primary" type="checkbox"/>
+<span class="font-caption text-on-surface-variant">Remember me</span>
+</label>
+<a class="font-caption text-primary hover:underline italic" href="#">Lost my map?</a>
+</div>
+<button class="w-full bg-primary-container text-on-primary font-label-md py-4 rounded-full shadow-lg hover:bg-primary transition-all active:scale-95 flex items-center justify-center gap-2" type="submit">
+<span>Sign In</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'opsz' 20">east</span>
+</button>
+</form>
+<!-- Secondary Actions -->
+<div class="mt-stack-lg text-center pt-stack-md border-t border-dotted border-outline-variant">
+<p class="font-body-md text-on-surface-variant mb-4">New to NavTrip-AI?</p>
+<button class="w-full border-1.5 border-on-surface text-on-surface font-label-md py-3 rounded-full hover:bg-surface-variant transition-all active:scale-95">
+                    Create Account
+                </button>
+</div>
+</div>
+<!-- Social Auth / "Pinned" Note style -->
+<div class="mt-stack-lg w-full max-w-xs relative">
+<div class="bg-[#fef9c3] p-4 shadow-md -rotate-1 transform origin-top-left relative border-l-4 border-yellow-200">
+<p class="font-headline-sm text-center italic text-on-surface-variant mb-3" style="font-size: 20px;">Or continue with...</p>
+<div class="flex justify-center space-x-6">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex flex-col items-center">
+<span class="material-symbols-outlined text-[32px]">travel_explore</span>
+<span class="text-[10px] font-label-md uppercase tracking-wider">Google</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex flex-col items-center">
+<span class="material-symbols-outlined text-[32px]">menu_book</span>
+<span class="text-[10px] font-label-md uppercase tracking-wider">Apple</span>
+</button>
+</div>
+<!-- Pin shadow metaphor -->
+<div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-outline rounded-full shadow-sm"></div>
+</div>
+</div>
+</main>
+<!-- Footer Area (Transactional Supression Logic: Nav suppressed, small footer only) -->
+<footer class="p-stack-md mt-auto text-center">
+<p class="font-caption text-on-secondary-fixed-variant">© 2024 NavTrip-AI. Journeying together.</p>
+<div class="flex justify-center gap-4 mt-2">
+<a class="font-caption text-on-secondary-fixed-variant underline decoration-dotted" href="#">Privacy</a>
+<a class="font-caption text-on-secondary-fixed-variant underline decoration-dotted" href="#">Terms</a>
+</div>
+</footer>
+<!-- Interactive Polish -->
+<script>
+        document.querySelectorAll('.input-underline').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.parentElement.classList.add('scale-[1.02]');
+                input.parentElement.parentElement.classList.add('transition-transform');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.parentElement.classList.remove('scale-[1.02]');
+            });
+        });
+    </script>
+</body></html>

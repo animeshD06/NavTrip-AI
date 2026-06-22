@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NavTrip-AI | Plan Your Next Adventure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-bright": "#f9f9f8",
+                "on-error-container": "#93000a",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-container": "#ffbda9",
+                "on-secondary": "#ffffff",
+                "background": "#f9f9f8",
+                "on-tertiary-container": "#cdcbca",
+                "secondary-container": "#e9e1db",
+                "on-error": "#ffffff",
+                "error-container": "#ffdad6",
+                "secondary-fixed-dim": "#ccc5c0",
+                "inverse-on-surface": "#f1f1f0",
+                "secondary": "#625e59",
+                "on-surface": "#1a1c1c",
+                "on-surface-variant": "#57423c",
+                "inverse-surface": "#2f3130",
+                "tertiary-fixed": "#e4e2e1",
+                "error": "#ba1a1a",
+                "tertiary-container": "#565656",
+                "outline": "#8b716a",
+                "primary": "#781f00",
+                "outline-variant": "#dec0b7",
+                "primary-container": "#9a3412",
+                "on-primary": "#ffffff",
+                "inverse-primary": "#ffb59f",
+                "surface-container-low": "#f4f4f3",
+                "primary-fixed": "#ffdbd1",
+                "on-primary-fixed": "#3a0a00",
+                "on-tertiary-fixed-variant": "#474746",
+                "on-tertiary": "#ffffff",
+                "surface-variant": "#e2e2e2",
+                "on-secondary-container": "#68635f",
+                "surface-tint": "#a53c19",
+                "primary-fixed-dim": "#ffb59f",
+                "secondary-fixed": "#e9e1db",
+                "on-tertiary-fixed": "#1b1c1b",
+                "surface-container-highest": "#e2e2e2",
+                "tertiary": "#3f3f3e",
+                "surface-container-high": "#e8e8e7",
+                "on-background": "#1a1c1c",
+                "surface-container": "#eeeeed",
+                "on-primary-fixed-variant": "#842503",
+                "surface": "#f9f9f8",
+                "tertiary-fixed-dim": "#c8c6c5",
+                "on-secondary-fixed-variant": "#4a4642",
+                "surface-dim": "#dadad9",
+                "on-secondary-fixed": "#1e1b18"
+            },
+            "borderRadius": {
+                "DEFAULT": "1rem",
+                "lg": "2rem",
+                "xl": "3rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "unit": "4px",
+                "stack-md": "16px",
+                "margin-mobile": "20px",
+                "gutter": "24px",
+                "stack-sm": "8px",
+                "stack-lg": "32px",
+                "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                "display-lg-mobile": ["Instrument Serif"],
+                "label-md": ["Inter"],
+                "body-md": ["Inter"],
+                "display-lg": ["Instrument Serif"],
+                "body-lg": ["Inter"],
+                "caption": ["Inter"],
+                "headline-sm": ["Instrument Serif"],
+                "headline-md": ["Instrument Serif"]
+            },
+            "fontSize": {
+                "display-lg-mobile": ["36px", {"lineHeight": "40px", "fontWeight": "400"}],
+                "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "display-lg": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                "headline-sm": ["24px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "headline-md": ["32px", {"lineHeight": "36px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f5f5f4;
+            background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+            overflow-x: hidden;
+        }
+
+        .polaroid-stack {
+            perspective: 1000px;
+        }
+
+        .polaroid {
+            background: #ffffff;
+            padding: 12px 12px 32px 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .timeline-spine {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #9a3412;
+            z-index: 0;
+        }
+
+        .spine-dot {
+            position: absolute;
+            left: 17px;
+            width: 16px;
+            height: 16px;
+            background: #f9f9f8;
+            border: 2px solid #9a3412;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .ink-bleed {
+            filter: contrast(120%) brightness(90%);
+            mix-blend-mode: multiply;
+        }
+
+        .taped::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-3deg);
+            width: 80px;
+            height: 30px;
+            background: rgba(233, 225, 219, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 10;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-bright shadow-sm fixed top-0 w-full z-40">
+<div class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
+<span class="font-display-lg text-headline-sm text-primary">NavTrip-AI</span>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-md hover:scale-105 transition-transform">
+                Sign In
+            </button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile flex flex-col gap-stack-lg">
+<!-- Hero Section -->
+<section class="flex flex-col gap-stack-md text-center py-stack-lg">
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-primary px-4 leading-tight">
+                Plan your next adventure with precision.
+            </h1>
+<p class="font-body-md text-on-surface-variant max-w-xs mx-auto italic">
+                From architectural sketches to curated itineraries, your journey begins with a thoughtful stroke of a pen.
+            </p>
+</section>
+<!-- Polaroid Card Stack -->
+<section class="relative polaroid-stack flex flex-col items-center gap-12 py-8">
+<!-- Card 1 -->
+<div class="polaroid taped rotate-[-2deg] w-full max-w-[280px]">
+<div class="aspect-square bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A vintage-style polaroid photograph of a cobblestone street in Rome at sunset. The lighting is warm and golden, casting long shadows of ancient architecture. The image has a soft film grain texture and a high-end travel journal aesthetic, using a palette of terracotta, warm stone, and deep ochre." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS3YqsQmCi4ZJ_3HviqcIGvfKHRAJbXpsYnntPYaTZm0q89YrK33wHpBLpgXJ2hSLVO5UwMRYIzG8-b8fLRsNjBHVkfYbNGdJqXtlWmY3u9NZWr7Uf9o7yAf-2BiN8atEiQQzf1_5IJxk4AN6QNTTZeofBPCIiYNReNhfrkTRkYI_GP8TxYZ-zWPVx8QZF0PVDHD4noLwo_KvMfUXnT_wsn6fWBs6Z6K6v-xdNBXAop3ywiOBc53BfTrf2zp0K-NMPeEeSHW8orXHW"/>
+</div>
+<p class="mt-4 font-headline-sm text-center text-primary-container ink-bleed">Rome, Italy</p>
+<p class="font-caption text-center text-on-surface-variant">Sept 2024</p>
+</div>
+<!-- Card 2 -->
+<div class="polaroid rotate-[1deg] w-full max-w-[280px] -mt-12 ml-8 z-10">
+<div class="aspect-square bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A textured polaroid shot of a serene mountain landscape in the Swiss Alps. Crisp white snow peaks against a deep blue sky. In the foreground, a small wooden cabin sits quietly. The aesthetic is clean and tactile, resembling a physical scrapbook entry with slight material imperfections and a soft drop shadow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmnccz6-ZK_YeSJtWMolco-A5LmY21IBgelwnRW8eRh322cXwmnzNUhaDv7EoUcUbLh0x3ptZG4Lk9z1cHyptK-Q07FdTExvTdkwCVpxYFzZVRou2sz04M5unu78HlZPYgzJcJmXAF4vha3HWwBzySoHIkkq1uhaVKkgdrH2P3z61zJ01B73xrrNgHDbnXGZ_dTopXBsZMfvrzjp9eMnQY6Z3WzaPlayHxO8rXyUQBt97eyJHFIZ4wC8Z2Es9Bhm6yYWM2VMEqkwyk"/>
+</div>
+<p class="mt-4 font-headline-sm text-center text-primary-container ink-bleed">Zermatt</p>
+<p class="font-caption text-center text-on-surface-variant">Winter Escape</p>
+</div>
+<!-- Card 3 -->
+<div class="polaroid rotate-[-1deg] w-full max-w-[280px] -mt-12 mr-6 z-20">
+<div class="aspect-square bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A polaroid photo of a vibrant street market in Marrakech. Bright textiles in shades of terracotta and indigo hang from old stone walls. The scene is lit by dappled sunlight filtering through straw canopies. The mood is authentic and curated, feeling like a cherished memory pinned into a travel planner." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAj24s5S8rkh64rycCmdj5Gx-1LoTfqm_DgL7iGV58Pm4nXPUatpOZ9sTdATetAjWfDUPFFoTtPV37-2bH6A9HSXnDDpk8f2HhI8OXCE1NxKAlyhMFLnUlY0TPZinJT0hmKBIWveuvWms4cqFvGilZjLRFgPbdku30Z3cpYHuJyZpttdH9wLb0Fbboet20xMPKs0dZZy-FsJVYh1WcFEkCjFzV7SFa87I9j10he0UCy6L_eUX83ZWMzvneYJD1-eJGqoUnqoiN9LiE"/>
+</div>
+<p class="mt-4 font-headline-sm text-center text-primary-container ink-bleed">Marrakech</p>
+<p class="font-caption text-center text-on-surface-variant">Market Finds</p>
+</div>
+</section>
+<!-- Timeline Journal Section -->
+<section class="relative pl-12 pr-4 py-stack-lg mt-8">
+<div class="timeline-spine"></div>
+<div class="flex flex-col gap-stack-lg">
+<!-- Day 1 -->
+<div class="relative group">
+<div class="spine-dot top-2"></div>
+<div class="bg-surface-container-low p-stack-md rounded-lg border-l-4 border-primary shadow-sm">
+<span class="font-label-md text-primary uppercase tracking-widest">Day 01</span>
+<h3 class="font-headline-sm mt-1">Arrival &amp; Acclimatization</h3>
+<p class="font-body-md text-on-surface-variant mt-2">
+                            Touch down and feel the textured air of the Mediterranean. Check into the boutique stay.
+                        </p>
+<div class="mt-4 flex gap-2">
+<span class="bg-secondary-container px-3 py-1 rounded-full text-caption">Map: Trastevere</span>
+</div>
+</div>
+</div>
+<!-- Day 2 -->
+<div class="relative group">
+<div class="spine-dot top-2"></div>
+<div class="bg-surface-container-low p-stack-md rounded-lg border-l-4 border-primary shadow-sm">
+<span class="font-label-md text-primary uppercase tracking-widest">Day 02</span>
+<h3 class="font-headline-sm mt-1">The Hidden Courtyards</h3>
+<p class="font-body-md text-on-surface-variant mt-2">
+                            An architectural walking tour guided by AI-curated sketches of Renaissance facades.
+                        </p>
+</div>
+</div>
+<!-- Sticky Note Callout -->
+<div class="bg-[#fef9c3] p-6 shadow-xl rotate-[1.5deg] max-w-[240px] self-center my-8 relative">
+<div class="absolute bottom-0 right-0 w-8 h-8 bg-[#fef08a] [clip-path:polygon(100%_0,0_100%,100%_100%)] shadow-inner"></div>
+<p class="font-headline-sm italic text-tertiary-container ink-bleed">
+                        "Don't forget to pack the linen journal and a good fountain pen."
+                    </p>
+</div>
+</div>
+</section>
+<!-- Bento Grid Features -->
+<section class="grid grid-cols-2 gap-4 py-8">
+<div class="col-span-2 bg-primary-container p-6 rounded-xl text-on-primary">
+<h4 class="font-headline-sm">Smart Scrapbooking</h4>
+<p class="font-body-md mt-2 opacity-90">Every trip is automatically formatted into a stunning digital heirloom.</p>
+</div>
+<div class="bg-secondary-container p-4 rounded-xl flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary" data-icon="draw">draw</span>
+<p class="font-label-md mt-4">Sketch Mode</p>
+</div>
+<div class="bg-surface-container-highest p-4 rounded-xl flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+<p class="font-label-md mt-4">AI Curation</p>
+</div>
+</section>
+<!-- Footer -->
+<footer class="flex flex-col items-center gap-6 py-12 border-t border-dotted border-outline-variant">
+<span class="font-display-lg text-primary">NavTrip-AI</span>
+<nav class="flex gap-4">
+<a class="font-caption text-on-surface-variant hover:text-primary" href="#">Privacy Policy</a>
+<a class="font-caption text-on-surface-variant hover:text-primary" href="#">Terms of Service</a>
+</nav>
+<p class="font-caption text-on-surface-variant">© 2024 NavTrip-AI. All rights reserved.</p>
+</footer>
+</main>
+<!-- Bottom Navigation Bar (Fixed Pill) -->
+<nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] bg-tertiary dark:bg-tertiary-container rounded-full z-50 flex justify-around items-center px-4 py-3 shadow-lg">
+<button class="flex flex-col items-center justify-center text-primary-fixed-dim scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md-mobile text-[10px] mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-tertiary opacity-70 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-label-md-mobile text-[10px] mt-1">Explore</span>
+</button>
+<!-- FAB -->
+<button class="bg-primary-container text-on-primary p-4 rounded-full -mt-12 shadow-xl hover:scale-110 transition-transform active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-tertiary opacity-70 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-label-md-mobile text-[10px] mt-1">Trips</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-tertiary opacity-70 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md-mobile text-[10px] mt-1">Profile</span>
+</button>
+</nav>
+<script>
+        // Simple scroll parallax for polaroids
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const polaroids = document.querySelectorAll('.polaroid');
+            polaroids.forEach((p, index) => {
+                const speed = 0.05 * (index + 1);
+                p.style.transform = `translateY(${scrolled * speed}px) rotate(${(index % 2 === 0 ? -1 : 1) * (1 + index)}deg)`;
+            });
+        });
+
+        // Click interaction for cards
+        document.querySelectorAll('.polaroid').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform += ' scale(0.98)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = card.style.transform.replace(' scale(0.98)', '');
+            });
+        });
+    </script>
+</body></html>

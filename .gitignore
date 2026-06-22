@@ -14,5 +14,5 @@ build/
 # IDE
 .idea/
 .vscode/
-backend-server.pid
-frontend-server.pid
+preview
+.pid

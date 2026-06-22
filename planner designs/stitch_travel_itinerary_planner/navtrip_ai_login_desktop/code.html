@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | NavTrip-AI</title>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#f9f9f8",
+                    "on-error-container": "#93000a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-container": "#ffbda9",
+                    "on-secondary": "#ffffff",
+                    "background": "#f9f9f8",
+                    "on-tertiary-container": "#cdcbca",
+                    "secondary-container": "#e9e1db",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#ccc5c0",
+                    "inverse-on-surface": "#f1f1f0",
+                    "secondary": "#625e59",
+                    "on-surface": "#1a1c1c",
+                    "on-surface-variant": "#57423c",
+                    "inverse-surface": "#2f3130",
+                    "tertiary-fixed": "#e4e2e1",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#565656",
+                    "outline": "#8b716a",
+                    "primary": "#781f00",
+                    "outline-variant": "#dec0b7",
+                    "primary-container": "#9a3412",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#ffb59f",
+                    "surface-container-low": "#f4f4f3",
+                    "primary-fixed": "#ffdbd1",
+                    "on-primary-fixed": "#3a0a00",
+                    "on-tertiary-fixed-variant": "#474746",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e2e2e2",
+                    "on-secondary-container": "#68635f",
+                    "surface-tint": "#a53c19",
+                    "primary-fixed-dim": "#ffb59f",
+                    "secondary-fixed": "#e9e1db",
+                    "on-tertiary-fixed": "#1b1c1b",
+                    "surface-container-highest": "#e2e2e2",
+                    "tertiary": "#3f3f3e",
+                    "surface-container-high": "#e8e8e7",
+                    "on-background": "#1a1c1c",
+                    "surface-container": "#eeeeed",
+                    "on-primary-fixed-variant": "#842503",
+                    "surface": "#f9f9f8",
+                    "tertiary-fixed-dim": "#c8c6c5",
+                    "on-secondary-fixed-variant": "#4a4642",
+                    "surface-dim": "#dadad9",
+                    "on-secondary-fixed": "#1e1b18"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "stack-md": "16px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "stack-sm": "8px",
+                    "stack-lg": "32px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "display-lg-mobile": ["Instrument Serif"],
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "display-lg": ["Instrument Serif"],
+                    "body-lg": ["Inter"],
+                    "caption": ["Inter"],
+                    "headline-sm": ["Instrument Serif"],
+                    "headline-md": ["Instrument Serif"]
+            },
+            "fontSize": {
+                    "display-lg-mobile": ["36px", {"lineHeight": "40px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "headline-sm": ["24px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["32px", {"lineHeight": "36px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .paper-texture {
+            background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+        }
+        .taped-photo {
+            transform: rotate(-1deg);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+        }
+        .hand-drawn-underline {
+            position: relative;
+        }
+        .hand-drawn-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 1.5px;
+            background: #8b716a;
+            border-radius: 100% 100% 0 0;
+            opacity: 0.4;
+        }
+        .polaroid-frame {
+            padding: 12px 12px 48px 12px;
+            background: white;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-md min-h-screen">
+<main class="flex flex-col md:flex-row min-h-screen w-full">
+<!-- Left Side: Archival Flat-lay (Split-Screen Storytelling) -->
+<section class="hidden md:flex md:w-1/2 relative overflow-hidden bg-secondary-fixed items-center justify-center p-margin-desktop">
+<!-- Background Texture for the "Desk" -->
+<div class="absolute inset-0 opacity-20 pointer-events-none grayscale" style="background-image: url('https://www.transparenttextures.com/patterns/wood-pattern-textured.png');"></div>
+<div class="relative z-10 w-full h-full max-w-2xl flex items-center justify-center">
+<!-- Polaroid styled container for the main image -->
+<div class="polaroid-frame taped-photo border-surface-container-lowest border-8">
+<img alt="Vintage travel flatlay" class="w-full h-auto object-cover grayscale-[10%] sepia-[15%] brightness-[95%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBF0XU3AL3w_e-ZuAMqI7naht3rDkZdQvuvPqu6bd9XrMhmQSQIMVZ8mg4mCcmtdJEbLljiiQr-ggnLSSnHGtKNqATWqyZ6mAZgn16MjURSw-9cwJmIcZ_lGdokYD5p6RlrxowTfj38oWvCpN7bMvOxgqTsVgoq17ZuoL0YQeQ2q88ntdXlwKYtsG2fPn8Q_8Oar3UVjsgG_s06EcKM3TbmEtH1mJBVehqXcpvhKvec4xjCtw0FsGYKc1egfIr-5brhv1fJN4PDxd5r"/>
+<div class="mt-8 text-center">
+<p class="font-headline-sm italic text-outline opacity-70">Capture the journey.</p>
+</div>
+</div>
+<!-- Decorative elements to reinforce archival theme -->
+<div class="absolute -top-10 -right-10 w-32 h-32 opacity-20 rotate-12">
+<span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'FILL' 0;">amp</span>
+</div>
+</div>
+</section>
+<!-- Right Side: Login Form (Clean Journal Page) -->
+<section class="flex-1 flex flex-col justify-center items-center px-margin-mobile md:px-margin-desktop py-stack-lg bg-surface-bright paper-texture">
+<div class="w-full max-w-md space-y-stack-lg">
+<!-- Branding Anchor -->
+<div class="mb-stack-lg text-center md:text-left">
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">NavTrip-AI</h1>
+</div>
+<div class="space-y-stack-sm">
+<h2 class="font-display-lg text-display-lg text-on-surface leading-tight">Welcome Back</h2>
+<p class="font-body-md text-on-surface-variant italic">Your memories are waiting for you.</p>
+</div>
+<!-- Form Section -->
+<form class="space-y-gutter mt-stack-lg" onsubmit="event.preventDefault();">
+<!-- Email Field (Underlined Notebook style) -->
+<div class="space-y-stack-sm group">
+<label class="font-label-md text-label-md text-on-surface-variant block" for="email">Email Address</label>
+<input class="w-full bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-0 py-2 transition-all placeholder:text-outline-variant font-body-md" id="email" name="email" placeholder="traveler@voyage.com" type="email"/>
+</div>
+<!-- Password Field -->
+<div class="space-y-stack-sm group">
+<div class="flex justify-between items-end">
+<label class="font-label-md text-label-md text-on-surface-variant" for="password">Password</label>
+<a class="font-caption text-caption text-primary hover:underline" href="#">Forgot?</a>
+</div>
+<input class="w-full bg-transparent border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 px-0 py-2 transition-all placeholder:text-outline-variant font-body-md" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+<!-- Actions -->
+<div class="pt-stack-md flex flex-col gap-unit">
+<button class="w-full py-4 bg-primary text-on-primary font-label-md rounded-full hover:bg-primary-container transition-all active:scale-95 shadow-md flex items-center justify-center gap-2 group" type="submit">
+<span>Sign In</span>
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Divider -->
+<div class="relative flex items-center py-stack-md">
+<div class="flex-grow border-t border-dotted border-outline-variant"></div>
+<span class="flex-shrink mx-4 font-caption text-caption text-on-surface-variant uppercase tracking-widest">or continue with</span>
+<div class="flex-grow border-t border-dotted border-outline-variant"></div>
+</div>
+<!-- Social Logins -->
+<div class="grid grid-cols-2 gap-gutter">
+<button class="flex items-center justify-center gap-3 py-3 border-1.5 border-on-surface rounded-full hover:bg-surface-container-low transition-colors font-label-md">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="currentColor"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="currentColor"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="currentColor"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="currentColor"></path>
+</svg>
+<span>Google</span>
+</button>
+<button class="flex items-center justify-center gap-3 py-3 border-1.5 border-on-surface rounded-full hover:bg-surface-container-low transition-colors font-label-md">
+<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M17.05 20.28c-.98.95-2.05 1.61-3.19 1.61-1.12 0-1.48-.68-2.8-.68-1.32 0-1.74.67-2.81.67-1.11 0-2.24-.76-3.23-1.72C3.01 18.2 1.5 15.1 1.5 12.11c0-3.27 2.12-5.01 4.15-5.01 1.07 0 2.08.74 2.74.74.65 0 1.77-.85 3.04-.85 1.58 0 2.9.83 3.66 1.94-3.14 1.88-2.63 6.27.51 7.64-.67 1.67-1.6 3.34-2.55 4.71zM11.64 6.18c0-1.92 1.6-3.48 3.46-3.48.03 0 .07 0 .1.01.1 1.98-1.53 3.67-3.41 3.67-.05 0-.1-.01-.15-.2z"></path>
+</svg>
+<span>Apple</span>
+</button>
+</div>
+<!-- Footer Text -->
+<p class="text-center font-body-md text-on-surface-variant pt-stack-lg">
+                    Don't have an account? 
+                    <a class="text-primary font-bold hover:underline transition-all" href="#">Start your journal</a>
+</p>
+</div>
+<!-- Footer for small links -->
+<footer class="mt-auto w-full max-w-md pt-stack-lg pb-stack-sm flex flex-wrap justify-center gap-gutter text-caption text-on-secondary-container">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Contact</a>
+</footer>
+</section>
+</main>
+<!-- Interactive script for subtle hover effects -->
+<script>
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('scale-[1.01]');
+                input.parentElement.classList.add('transition-transform');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('scale-[1.01]');
+            });
+        });
+
+        // Simple parallax or movement for the left side image on mouse move
+        const photo = document.querySelector('.taped-photo');
+        if (photo) {
+            window.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) / 100;
+                const moveY = (e.clientY - window.innerHeight / 2) / 100;
+                photo.style.transform = `rotate(-1deg) translate(${moveX}px, ${moveY}px)`;
+            });
+        }
+    </script>
+</body></html>

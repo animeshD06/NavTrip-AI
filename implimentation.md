@@ -393,3 +393,30 @@ Date: 2026-05-26
 - [x] Flutter analyze
 - [x] Flutter widget test
 - [x] Flutter web build
+
+## Advanced Feature Implementation Pass
+
+Date: 2026-06-18
+
+- [x] Added advanced PostgreSQL schema tables for guide packs, narration cache, community routes, recommendations, offline knowledge, optimization runs, achievements, social features, weather/crowd insights, analytics, and admin reporting.
+- [x] Added backend API groups for guide packs, narrations, community routes, hidden gems, offline assistant, itinerary optimization, achievements, social feed/follows, stories, weather/crowd insights, analytics events, and admin analytics.
+- [x] Added deterministic local-mode services so advanced APIs work without external AI, weather, AR, or database dependencies during development.
+- [x] Extended Flutter API client for the new advanced endpoints.
+- [x] Extended voice narration with short, medium, and detailed modes plus language selection.
+- [x] Added geofenced auto narration service with 50m/100m/200m radius settings and cooldown behavior.
+- [x] Added in-memory offline guide-pack cache and offline assistant search abstraction.
+- [x] Added AR exploration service bridge with mobile-ready support detection and web/desktop map fallback.
+- [x] Added map UI controls for auto guide, radius, narration mode, stop narration, current location, and AR fallback.
+- [x] Added backend tests covering the new advanced endpoint groups.
+- [x] Ran backend test suite successfully.
+- [x] Ran Flutter analyze successfully.
+- [x] Ran Flutter widget test successfully.
+
+Remaining production hardening:
+
+- [ ] Replace local-mode advanced feature stores with database-backed repositories for all write-heavy social/community/analytics features.
+- [ ] Replace in-memory Flutter offline cache with durable SQLite/Hive storage.
+- [ ] Add authenticated media upload/storage integration for cover images, stories, and reviews.
+- [ ] Add real OpenWeather provider integration behind the weather/crowd service.
+- [ ] Add native ARCore/ARKit package integration behind the AR exploration service.
+- [ ] Add admin role enforcement once user roles exist.

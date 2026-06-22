@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Iceland: The Ring Road - NavTrip-AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#f9f9f8",
+                    "on-error-container": "#93000a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-container": "#ffbda9",
+                    "on-secondary": "#ffffff",
+                    "background": "#f9f9f8",
+                    "on-tertiary-container": "#cdcbca",
+                    "secondary-container": "#e9e1db",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#ccc5c0",
+                    "inverse-on-surface": "#f1f1f0",
+                    "secondary": "#625e59",
+                    "on-surface": "#1a1c1c",
+                    "on-surface-variant": "#57423c",
+                    "inverse-surface": "#2f3130",
+                    "tertiary-fixed": "#e4e2e1",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#565656",
+                    "outline": "#8b716a",
+                    "primary": "#781f00",
+                    "outline-variant": "#dec0b7",
+                    "primary-container": "#9a3412",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#ffb59f",
+                    "surface-container-low": "#f4f4f3",
+                    "primary-fixed": "#ffdbd1",
+                    "on-primary-fixed": "#3a0a00",
+                    "on-tertiary-fixed-variant": "#474746",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e2e2e2",
+                    "on-secondary-container": "#68635f",
+                    "surface-tint": "#a53c19",
+                    "primary-fixed-dim": "#ffb59f",
+                    "secondary-fixed": "#e9e1db",
+                    "on-tertiary-fixed": "#1b1c1b",
+                    "surface-container-highest": "#e2e2e2",
+                    "tertiary": "#3f3f3e",
+                    "surface-container-high": "#e8e8e7",
+                    "on-background": "#1a1c1c",
+                    "surface-container": "#eeeeed",
+                    "on-primary-fixed-variant": "#842503",
+                    "surface": "#f9f9f8",
+                    "tertiary-fixed-dim": "#c8c6c5",
+                    "on-secondary-fixed-variant": "#4a4642",
+                    "surface-dim": "#dadad9",
+                    "on-secondary-fixed": "#1e1b18"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "stack-md": "16px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "stack-sm": "8px",
+                    "stack-lg": "32px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "display-lg-mobile": ["Instrument Serif"],
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "display-lg": ["Instrument Serif"],
+                    "body-lg": ["Inter"],
+                    "caption": ["Inter"],
+                    "headline-sm": ["Instrument Serif"],
+                    "headline-md": ["Instrument Serif"]
+            },
+            "fontSize": {
+                    "display-lg-mobile": ["36px", {"lineHeight": "40px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "headline-sm": ["24px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["32px", {"lineHeight": "36px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .paper-grain {
+            background-color: #f9f9f8;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        }
+        .polaroid-shadow {
+            box-shadow: 8px 8px 24px -4px rgba(0, 0, 0, 0.1), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+        }
+        .spine-line {
+            background: repeating-linear-gradient(to bottom, #9a3412 0, #9a3412 4px, transparent 4px, transparent 8px);
+            width: 2px;
+        }
+        .sticky-note {
+            box-shadow: 2px 5px 10px rgba(0,0,0,0.1);
+            transform: rotate(1deg);
+        }
+        .taped-effect::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 80px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(2px);
+            z-index: 10;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #dec0b7; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-md selection:bg-primary-fixed-dim selection:text-on-primary-fixed overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="bg-surface-bright dark:bg-surface-dim shadow-sm docked full-width top-0 z-50">
+<nav class="flex justify-between items-center px-margin-desktop py-4 w-full max-w-7xl mx-auto">
+<div class="font-display-lg text-display-lg text-primary dark:text-inverse-primary">NavTrip-AI</div>
+<div class="hidden md:flex gap-gutter items-center">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors duration-200 font-label-md text-label-md" href="#">Explore</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-inverse-primary transition-colors duration-200 font-label-md text-label-md" href="#">Planner</a>
+<a class="text-primary dark:text-inverse-primary font-bold border-b-2 border-primary dark:border-inverse-primary pb-1 font-label-md text-label-md" href="#">My Trips</a>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-md text-label-md hover:opacity-80 transition-all duration-200">Sign In</button>
+</div>
+</nav>
+</header>
+<!-- Hero Section -->
+<section class="relative h-[716px] w-full overflow-hidden">
+<div class="absolute inset-0 z-0" data-alt="A cinematic, wide-angle landscape photograph of the Icelandic Ring Road winding through dramatic volcanic terrain. The scene features a solitary road cutting through moss-covered lava fields under a moody, overcast sky with hints of golden light breaking through the clouds. Massive basalt cliffs and a distant waterfall are visible, capturing the raw, untamed beauty of the North. The lighting is ethereal and cool-toned, emphasizing the scale and solitude of the journey." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAvM2OTp2gDpKOxH_Kl-WmlyBp8GHw7-mZjEbwr8_B6HUY4UvNNGqKC6-Z7rcU_c9ZsFgVi-9wYCMyUCr_xO26X_usQChYzFsmDyA_WEMQzi-eIH3BlUOLXRTB--i5oQgIEToK8PWa-Ywq3DDAXKgnRl6OztI_LdZXmf52qrCa7OM5FuA-tPOMLXege9SPYNoCRbZT-4d0d5zuRiloVcMhJyNO48vsaDOXSe4x-q-NoLFLgjYSi-t77-PPu1i9RB5ZtOJj_Kx82vjVL')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-stack-lg left-margin-desktop z-10">
+<h1 class="font-display-lg text-[64px] leading-none text-white drop-shadow-lg">Iceland: The Ring Road</h1>
+<p class="text-white/90 font-headline-sm text-headline-sm mt-stack-sm italic italic">A 10-day odyssey through fire and ice.</p>
+</div>
+</section>
+<!-- Day Selector (Tabs) -->
+<div class="sticky top-[72px] z-40 bg-surface-bright border-b border-outline-variant/30 px-margin-desktop py-4 flex items-center gap-gutter overflow-x-auto no-scrollbar">
+<button class="flex-shrink-0 px-6 py-2 rounded-full bg-primary-container text-white font-label-md text-label-md shadow-md">Day 1</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full border border-outline text-on-surface-variant font-label-md text-label-md hover:bg-secondary-container transition-colors">Day 2</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full border border-outline text-on-surface-variant font-label-md text-label-md hover:bg-secondary-container transition-colors">Day 3</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full border border-outline text-on-surface-variant font-label-md text-label-md hover:bg-secondary-container transition-colors">Day 4</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full border border-outline text-on-surface-variant font-label-md text-label-md hover:bg-secondary-container transition-colors">Day 5</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full border border-outline text-on-surface-variant font-label-md text-label-md hover:bg-secondary-container transition-colors">Day 6</button>
+</div>
+<!-- Main Content Layout -->
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg flex flex-col lg:flex-row gap-gutter paper-grain min-h-screen">
+<!-- Timeline Content (Left) -->
+<div class="flex-grow relative">
+<div class="absolute left-4 top-0 bottom-0 spine-line"></div>
+<div class="space-y-stack-lg pl-12">
+<!-- Moment 1 -->
+<div class="relative group">
+<div class="absolute -left-10 top-6 w-4 h-4 rounded-full border-4 border-primary bg-surface-bright z-10"></div>
+<div class="bg-surface-container-lowest p-6 rounded-lg polaroid-shadow transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+<div class="relative aspect-[4/3] mb-4 overflow-hidden rounded-sm">
+<img class="w-full h-full object-cover" data-alt="A professional photograph of the Blue Lagoon in Iceland during sunrise. The milky-blue geothermal water is steaming against a backdrop of dark, rugged lava rocks. Soft pink and orange hues from the morning sun reflect on the water's surface. The composition is serene and atmospheric, focusing on the contrast between the vibrant water and the jagged terrain. Minimalist, high-end travel aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVtxnFOqIasLLqGyeAHpCsgWAZD1F1ciUDugTvGI1Fz_GHnupjHXnRpFnWaLfJd0HUfLsEb4L0wknm2rMKFhlxq2OjeGGsWTBhlg0o3RJWJYnxfnQDRfJpaSGcg0oS_fMa-wAnxwxtkiQfrHZit7FwIIBwe72IyyANVpk2RAp49nxblFJWAvtOGakKO6Ckv0Qq8IZ0gbFL7HuERffqh1yO0vJuBY8iTzgPA8FfPI2Kpf2fBLG9iAVBocmSCrvKYTHAOfv70wxUpRjt"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">Arrival &amp; The Blue Lagoon</h3>
+<p class="text-on-surface-variant font-body-md text-body-md mb-4">Touch down at Keflavík and head straight to the geothermal sanctuary. The mineral-rich waters are the perfect remedy for jet lag.</p>
+<div class="flex justify-between items-center">
+<span class="text-caption font-caption text-outline">09:00 AM • 45 km Drive</span>
+<a class="text-primary font-label-md text-label-md flex items-center gap-1 hover:underline" href="#">
+                                View Route <span class="material-symbols-outlined text-sm">map</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Moment 2 -->
+<div class="relative group">
+<div class="absolute -left-10 top-6 w-4 h-4 rounded-full border-4 border-primary bg-surface-bright z-10"></div>
+<div class="bg-white p-4 pb-12 rounded-sm polaroid-shadow transform rotate-1 hover:rotate-0 transition-transform duration-300 border-[8px] border-white taped-effect relative">
+<div class="aspect-square mb-4 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A polaroid-style photo of Hallgrimskirkja church in Reykjavik. The towering concrete structure stands boldly against a crisp blue sky. The photo captures the unique architecture inspired by basalt lava flows. The image has a slight vintage film grain and warm saturation, evoking a nostalgic travel journal feel. Street life and colorful rooftops are visible at the base of the frame." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsKOR1QfJ6_ZHjV5Pvune8p7rg7srs-y-H62gKMiCiCrdNnlNbSrL0mmcGphr0VeNASG7TQvtflyune8FZXWV6UjQwDw6mNeeXDoYhpP0BN542_yz8T-R97s5AMFFzkHXwRHDchrM5jWZZNZbcDGM2Ai_OSIQNb_Ri0xX2xPvPHZJqBDOzm8ZbGZyOZLr7SNN0DHPFdOpoRVvJmqwbW926-qwrpvJVqEKAYlozABNtPBn6_9AF58S8WPnhdqBCXIxyTmv2f9SKIUOP"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">Reykjavík Exploration</h3>
+<p class="text-on-surface-variant font-body-md text-body-md italic leading-relaxed">"Walking through the colorful streets of the capital. The air is crisp, and the coffee at Brauð &amp; Co is life-changing."</p>
+<div class="mt-4 flex justify-between items-center">
+<span class="text-caption font-caption text-outline">01:30 PM • City Walk</span>
+<a class="text-primary font-label-md text-label-md flex items-center gap-1 hover:underline" href="#">
+                                View Route <span class="material-symbols-outlined text-sm">directions_walk</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Moment 3 -->
+<div class="relative group">
+<div class="absolute -left-10 top-6 w-4 h-4 rounded-full border-4 border-primary bg-surface-bright z-10"></div>
+<div class="bg-surface-container-lowest p-6 rounded-lg polaroid-shadow transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+<div class="relative aspect-video mb-4 overflow-hidden rounded-sm">
+<img class="w-full h-full object-cover" data-alt="A wide cinematic shot of a camper van parked on the edge of a cliff overlooking a black sand beach in Iceland. The waves are crashing violently against the shore in the background. The van's interior lights glow warmly as dusk settles over the landscape. Deep blues and charcoal greys dominate the palette, with the warm orange light of the van providing a cozy focal point. Professional architectural photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkZ44gDpb2xuW4t0kpyDAKagXzKFJRTFfAE3IzSNR2xr0D6Xtp4YK9bTEu_O8x11oRUiuj0LngV7dfb9CPYYgzypvawNRj7Z2KQiQFTxgRrL7Pjr_Gpt3hyI6rBzkEydTFpdjVI1WSmhr0W_rIG5cVe2n9rrQGB394hsn_c74gaghC5aZwDHLsuDS5VSjMV0HMuS76ZsnDUHcZDKxZTyFgCrG3YL_EItyt05CvJjl2xhwuELWffLmZA2Nz38hQBgYCov3tmUS6oXMW"/>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-2">Coastal Drive to Vík</h3>
+<p class="text-on-surface-variant font-body-md text-body-md mb-4">Chase the setting sun along the south coast. The black sands of Reynisfjara await as our first overnight stop.</p>
+<div class="flex justify-between items-center">
+<span class="text-caption font-caption text-outline">06:00 PM • 180 km Drive</span>
+<a class="text-primary font-label-md text-label-md flex items-center gap-1 hover:underline" href="#">
+                                View Route <span class="material-symbols-outlined text-sm">route</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar (Right) -->
+<aside class="lg:w-[320px] flex-shrink-0 space-y-stack-lg">
+<!-- Weather Widget -->
+<div class="sticky-note bg-[#fef9c3] p-6 border-b-4 border-r-4 border-black/5">
+<div class="flex justify-between items-start mb-4">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Weather</h4>
+<span class="material-symbols-outlined text-primary text-3xl">cloudy_snowing</span>
+</div>
+<div class="space-y-stack-sm">
+<div class="flex justify-between border-b border-black/10 pb-2">
+<span class="font-label-md text-label-md">Current</span>
+<span class="font-body-md text-body-md">-2°C</span>
+</div>
+<div class="flex justify-between border-b border-black/10 pb-2">
+<span class="font-label-md text-label-md">Wind</span>
+<span class="font-body-md text-body-md">24 km/h</span>
+</div>
+<p class="text-caption font-caption text-on-surface-variant italic mt-2">"Pack layers. The wind bites today."</p>
+</div>
+</div>
+<!-- Budget Widget -->
+<div class="bg-surface-container p-6 rounded-lg shadow-inner border border-outline-variant/50">
+<h4 class="font-headline-sm text-headline-sm text-primary mb-4">Estimated Budget</h4>
+<div class="space-y-stack-md">
+<div>
+<div class="flex justify-between text-caption font-caption mb-1">
+<span>Car &amp; Fuel</span>
+<span>$1,200</span>
+</div>
+<div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[75%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-caption font-caption mb-1">
+<span>Stay</span>
+<span>$1,800</span>
+</div>
+<div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[60%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-caption font-caption mb-1">
+<span>Food &amp; Misc</span>
+<span>$800</span>
+</div>
+<div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[40%]"></div>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant flex justify-between items-center">
+<span class="font-bold text-on-surface">Total</span>
+<span class="font-headline-sm text-headline-sm text-primary">$3,800</span>
+</div>
+</div>
+</div>
+<!-- Note -->
+<div class="bg-secondary-container p-6 rounded-lg border-2 border-dotted border-outline">
+<p class="text-body-md font-body-md italic text-on-secondary-container">
+                    Remember to download offline maps for the Eastfjords. Signal can be spotty between the mountain passes.
+                </p>
+</div>
+</aside>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-highest border-t border-dotted border-outline-variant dark:border-outline mt-20">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-stack-lg w-full max-w-7xl mx-auto">
+<div class="font-display-lg text-display-lg text-primary mb-4 md:mb-0">NavTrip-AI</div>
+<div class="flex gap-gutter mb-4 md:mb-0">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Cookie Policy</a>
+</div>
+<div class="text-secondary dark:text-secondary-fixed font-caption text-caption">
+                © 2024 NavTrip-AI. All rights reserved.
+            </div>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<div class="md:hidden fixed bottom-stack-md left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] rounded-full z-50 bg-tertiary dark:bg-tertiary-container shadow-lg flex justify-around items-center px-6 py-3">
+<div class="flex flex-col items-center justify-center text-on-tertiary dark:text-on-tertiary-container hover:scale-105 transition-transform duration-200">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] uppercase font-bold">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-tertiary dark:text-on-tertiary-container hover:scale-105 transition-transform duration-200">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[10px] uppercase font-bold">Explore</span>
+</div>
+<div class="bg-primary rounded-full p-4 -mt-12 shadow-xl scale-95 transition-all duration-150 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">add</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary-fixed dark:text-primary-fixed-dim hover:scale-105 transition-transform duration-200">
+<span class="material-symbols-outlined">map</span>
+<span class="text-[10px] uppercase font-bold">Trips</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-tertiary dark:text-on-tertiary-container hover:scale-105 transition-transform duration-200">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] uppercase font-bold">Profile</span>
+</div>
+</div>
+<script>
+        // Micro-interaction for timeline cards
+        document.querySelectorAll('.group').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.querySelector('.material-symbols-outlined').style.transform = 'translateX(4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.querySelector('.material-symbols-outlined').style.transform = 'translateX(0)';
+            });
+        });
+    </script>
+</body></html>
