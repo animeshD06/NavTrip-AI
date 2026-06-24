@@ -15,6 +15,15 @@ test('health endpoint reports ok', async () => {
   assert.equal(response.body.database.connected, false);
 });
 
+test('health endpoint allows loopback web origins in development', async () => {
+  const response = await request(app)
+    .get('/api/health')
+    .set('Origin', 'http://localhost:61977')
+    .expect(200);
+
+  assert.equal(response.headers['access-control-allow-origin'], 'http://localhost:61977');
+});
+
 test('places endpoint returns Jaipur places', async () => {
   const response = await request(app)
     .get('/api/places')

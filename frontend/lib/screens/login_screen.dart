@@ -1,5 +1,7 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../core/clerk_auth_config.dart';
 import '../theme/navtrip_theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,17 +12,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
+  bool _launchingClerk = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +32,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return Row(
       children: [
         Expanded(child: _StoryPanel(large: true)),
-        Expanded(child: _FormPanel(formKey: _formKey, emailController: _emailController, passwordController: _passwordController, obscurePassword: _obscurePassword, onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword), onSubmit: _submit, onGoogle: _socialTap, onApple: _socialTap)),
+        Expanded(
+          child: _ClerkPanel(
+            isBusy: _launchingClerk,
+            hasClerkUrl: ClerkAuthConfig.hasSignInUrl,
+            onContinue: _openClerkAuth,
+            onLearnMore: _openClerkDocs,
+          ),
+        ),
       ],
     );
   }
@@ -52,22 +51,68 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           _StoryPanel(large: false),
           const SizedBox(height: 24),
-          _FormPanel(formKey: _formKey, emailController: _emailController, passwordController: _passwordController, obscurePassword: _obscurePassword, onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword), onSubmit: _submit, onGoogle: _socialTap, onApple: _socialTap),
+          _ClerkPanel(
+            isBusy: _launchingClerk,
+            hasClerkUrl: ClerkAuthConfig.hasSignInUrl,
+            onContinue: _openClerkAuth,
+            onLearnMore: _openClerkDocs,
+          ),
         ],
       ),
     );
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) {
+  Future<void> _openClerkAuth() async {
+    final signInUrl = ClerkAuthConfig.signInUrl;
+    if (signInUrl.isEmpty) {
+      _showSnackBar(
+        'Set CLERK_SIGN_IN_URL to your Clerk sign-in page before using /login.',
+      );
       return;
     }
-    Navigator.of(context).pushReplacementNamed('/dashboard');
+
+    final uri = Uri.tryParse(signInUrl);
+    if (uri == null || !(uri.scheme == 'http' || uri.scheme == 'https')) {
+      _showSnackBar('CLERK_SIGN_IN_URL must be a valid http or https URL.');
+      return;
+    }
+
+    setState(() {
+      _launchingClerk = true;
+    });
+
+    try {
+      final opened = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!opened && mounted) {
+        _showSnackBar('Unable to open the Clerk sign-in page.');
+      }
+    } catch (_) {
+      if (mounted) {
+        _showSnackBar('Unable to open the Clerk sign-in page.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _launchingClerk = false;
+        });
+      }
+    }
   }
 
-  void _socialTap() {
+  Future<void> _openClerkDocs() async {
+    await launchUrl(
+      Uri.parse('https://clerk.com/docs'),
+      mode: LaunchMode.externalApplication,
+    );
+  }
+
+  void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Social login preview tapped')),
+      SnackBar(content: Text(message)),
     );
   }
 }
@@ -129,26 +174,18 @@ class _StoryPanel extends StatelessWidget {
   }
 }
 
-class _FormPanel extends StatelessWidget {
-  const _FormPanel({
-    required this.formKey,
-    required this.emailController,
-    required this.passwordController,
-    required this.obscurePassword,
-    required this.onTogglePassword,
-    required this.onSubmit,
-    required this.onGoogle,
-    required this.onApple,
+class _ClerkPanel extends StatelessWidget {
+  const _ClerkPanel({
+    required this.isBusy,
+    required this.hasClerkUrl,
+    required this.onContinue,
+    required this.onLearnMore,
   });
 
-  final GlobalKey<FormState> formKey;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final bool obscurePassword;
-  final VoidCallback onTogglePassword;
-  final VoidCallback onSubmit;
-  final VoidCallback onGoogle;
-  final VoidCallback onApple;
+  final bool isBusy;
+  final bool hasClerkUrl;
+  final VoidCallback onContinue;
+  final VoidCallback onLearnMore;
 
   @override
   Widget build(BuildContext context) {
@@ -159,83 +196,88 @@ class _FormPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('NavTrip-AI', style: Theme.of(context).textTheme.displayMedium?.copyWith(color: NavTripPalette.terracottaDeep)),
+            Text(
+              'NavTrip-AI',
+              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    color: NavTripPalette.terracottaDeep,
+                  ),
+            ),
             const SizedBox(height: 18),
-            Text('Welcome Back', style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 42, color: NavTripPalette.ink)),
+            Text(
+              'Welcome Back',
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                    fontSize: 42,
+                    color: NavTripPalette.ink,
+                  ),
+            ),
             const SizedBox(height: 8),
-            Text('Your memories are waiting for you.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic, color: NavTripPalette.mutedInk)),
+            Text(
+              'Sign in or create your account with Clerk from the existing /login route.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: NavTripPalette.mutedInk,
+                  ),
+            ),
             const SizedBox(height: 28),
-            Form(
-              key: formKey,
+            Container(
+              decoration: NavTripStyles.polaroidCard(),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextFormField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(labelText: 'Email Address', hintText: 'traveler@voyage.com'),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Enter your email';
-                      if (!value.contains('@')) return 'Enter a valid email';
-                      return null;
-                    },
+                  const _BenefitRow(
+                    icon: Icons.verified_user_outlined,
+                    text: 'Clerk handles sign in and sign up in one flow.',
                   ),
-                  const SizedBox(height: 22),
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: '••••••••',
-                      suffixIcon: IconButton(
-                        onPressed: onTogglePassword,
-                        icon: Icon(obscurePassword ? Icons.visibility_off : Icons.visibility),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return 'Enter your password';
-                      if (value.length < 6) return 'Use at least 6 characters';
-                      return null;
-                    },
+                  const SizedBox(height: 14),
+                  const _BenefitRow(
+                    icon: Icons.lock_outline,
+                    text: 'The UI stays on your existing /login route and keeps the travel journal look.',
                   ),
-                  const SizedBox(height: 28),
-                  FilledButton.icon(
-                    onPressed: onSubmit,
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Sign In'),
-                  ),
-                  const SizedBox(height: 22),
-                  Row(
-                    children: [
-                      const Expanded(child: Divider()),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text('or continue with', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: NavTripPalette.mutedInk)),
-                      ),
-                      const Expanded(child: Divider()),
-                    ],
-                  ),
-                  const SizedBox(height: 22),
-                  Row(
-                    children: [
-                      Expanded(child: _SocialButton(label: 'Google', icon: Icons.g_mobiledata, onTap: onGoogle)),
-                      const SizedBox(width: 12),
-                      Expanded(child: _SocialButton(label: 'Apple', icon: Icons.apple, onTap: onApple)),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text('Forgot your password?'),
+                  const SizedBox(height: 14),
+                  const _BenefitRow(
+                    icon: Icons.public_outlined,
+                    text: 'Configure the Clerk sign-in URL with a Dart define when you run the app.',
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: isBusy || !hasClerkUrl ? null : onContinue,
+              icon: isBusy
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.open_in_new),
+              label: Text(
+                isBusy ? 'Opening Clerk...' : 'Continue with Clerk',
+              ),
+            ),
+            const SizedBox(height: 12),
             Text(
-              'Don\'t have an account? Start your journal.',
+              hasClerkUrl
+                  ? 'If you choose sign up inside Clerk, the same flow returns to the app after authentication.'
+                  : 'Set CLERK_SIGN_IN_URL to enable Clerk auth from this screen.',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NavTripPalette.mutedInk),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: NavTripPalette.mutedInk,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: onLearnMore,
+              child: const Text('Read Clerk docs'),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Don\'t have an account? Clerk sign-up is available from the same entry point.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: NavTripPalette.mutedInk,
+                  ),
             ),
           ],
         ),
@@ -244,26 +286,31 @@ class _FormPanel extends StatelessWidget {
   }
 }
 
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
-    required this.label,
+class _BenefitRow extends StatelessWidget {
+  const _BenefitRow({
     required this.icon,
-    required this.onTap,
+    required this.text,
   });
 
-  final String label;
   final IconData icon;
-  final VoidCallback onTap;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, size: 20),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: NavTripPalette.terracottaDeep),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: NavTripPalette.ink,
+                ),
+          ),
+        ),
+      ],
     );
   }
 }

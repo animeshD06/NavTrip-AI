@@ -1,4 +1,4 @@
-name: navtrip_ai
+﻿name: navtrip_ai
 description: AI Tourist Map and Smart Travel Planner.
 publish_to: "none"
 
@@ -17,6 +17,7 @@ dependencies:
   latlong2: ^0.9.1
   provider: ^6.1.2
   flutter_tts: ^4.2.5
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

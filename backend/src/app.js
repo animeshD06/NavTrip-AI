@@ -1,3 +1,4 @@
+﻿import { clerkMiddleware } from '@clerk/express';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
@@ -25,12 +26,34 @@ import weatherCrowdRoutes from './routes/weather-crowd.routes.js';
 import { httpError, sendError } from './utils/http.js';
 
 const app = express();
+const clerkEnabled = Boolean(process.env.CLERK_SECRET_KEY && process.env.CLERK_PUBLISHABLE_KEY);
+
+function isLoopbackOrigin(origin) {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1';
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedOrigin(origin) {
+  if (!origin || env.corsOrigins.length === 0) {
+    return true;
+  }
+
+  if (env.nodeEnv !== 'production' && isLoopbackOrigin(origin)) {
+    return true;
+  }
+
+  return env.corsOrigins.includes(origin);
+}
 
 app.use(helmet());
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || env.corsOrigins.length === 0 || env.corsOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 
@@ -48,6 +71,7 @@ app.use(
 );
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(clerkEnabled ? clerkMiddleware() : (req, res, next) => next());
 
 app.get('/', (req, res) => {
   res.json({
