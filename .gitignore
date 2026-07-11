@@ -1,10 +1,11 @@
-node_modules/
+﻿node_modules/
 .env
 .DS_Store
 *.log
 tools/flutter/
 *.pid
 *.md
+!docs/*.md
 
 # Flutter/Dart
 .dart_tool/
@@ -18,3 +19,4 @@ build/
 .vscode/
 preview
 .pid
+

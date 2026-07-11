@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/navtrip_theme.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({
     this.redirectTo,
     super.key,
   });
@@ -13,20 +13,25 @@ class LoginScreen extends StatefulWidget {
   final String? redirectTo;
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _identifierController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _redirectQueued = false;
 
   @override
   void dispose() {
-    _identifierController.dispose();
+    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -55,19 +60,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Expanded(child: _StoryPanel(large: true)),
                         Expanded(
-                          child: _LoginPanel(
+                          child: _SignUpPanel(
                             formKey: _formKey,
                             auth: auth,
-                            identifierController: _identifierController,
+                            emailController: _emailController,
+                            usernameController: _usernameController,
                             passwordController: _passwordController,
+                            confirmPasswordController: _confirmPasswordController,
                             obscurePassword: _obscurePassword,
+                            obscureConfirmPassword: _obscureConfirmPassword,
                             onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
+                            onToggleConfirmPassword: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                             onSubmit: _submit,
                             onGoogle: _googleSignIn,
-                            onSignUp: () => Navigator.of(context).pushReplacementNamed(
-                              '/signup',
-                              arguments: widget.redirectTo,
-                            ),
+                            onLogin: () => Navigator.of(context).pushReplacementNamed('/login', arguments: widget.redirectTo),
                             redirectTo: widget.redirectTo,
                           ),
                         ),
@@ -79,19 +85,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           _StoryPanel(large: false),
                           const SizedBox(height: 20),
-                          _LoginPanel(
+                          _SignUpPanel(
                             formKey: _formKey,
                             auth: auth,
-                            identifierController: _identifierController,
+                            emailController: _emailController,
+                            usernameController: _usernameController,
                             passwordController: _passwordController,
+                            confirmPasswordController: _confirmPasswordController,
                             obscurePassword: _obscurePassword,
+                            obscureConfirmPassword: _obscureConfirmPassword,
                             onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
+                            onToggleConfirmPassword: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                             onSubmit: _submit,
                             onGoogle: _googleSignIn,
-                            onSignUp: () => Navigator.of(context).pushReplacementNamed(
-                              '/signup',
-                              arguments: widget.redirectTo,
-                            ),
+                            onLogin: () => Navigator.of(context).pushReplacementNamed('/login', arguments: widget.redirectTo),
                             redirectTo: widget.redirectTo,
                           ),
                         ],
@@ -114,9 +121,11 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    await auth.signIn(
-      identifier: _identifierController.text,
+    await auth.signUp(
+      email: _emailController.text,
+      username: _usernameController.text,
       password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
     );
 
     if (!mounted) {
@@ -200,29 +209,37 @@ class _StoryPanel extends StatelessWidget {
   }
 }
 
-class _LoginPanel extends StatelessWidget {
-  const _LoginPanel({
+class _SignUpPanel extends StatelessWidget {
+  const _SignUpPanel({
     required this.formKey,
     required this.auth,
-    required this.identifierController,
+    required this.emailController,
+    required this.usernameController,
     required this.passwordController,
+    required this.confirmPasswordController,
     required this.obscurePassword,
+    required this.obscureConfirmPassword,
     required this.onTogglePassword,
+    required this.onToggleConfirmPassword,
     required this.onSubmit,
     required this.onGoogle,
-    required this.onSignUp,
+    required this.onLogin,
     required this.redirectTo,
   });
 
   final GlobalKey<FormState> formKey;
   final AuthProvider auth;
-  final TextEditingController identifierController;
+  final TextEditingController emailController;
+  final TextEditingController usernameController;
   final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
   final bool obscurePassword;
+  final bool obscureConfirmPassword;
   final VoidCallback onTogglePassword;
+  final VoidCallback onToggleConfirmPassword;
   final Future<void> Function() onSubmit;
   final Future<void> Function() onGoogle;
-  final VoidCallback onSignUp;
+  final VoidCallback onLogin;
   final String? redirectTo;
 
   @override
@@ -244,7 +261,7 @@ class _LoginPanel extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               Text(
-                'Sign in',
+                'Create account',
                 style: Theme.of(context).textTheme.displayLarge?.copyWith(
                       fontSize: 42,
                       color: NavTripPalette.ink,
@@ -252,7 +269,7 @@ class _LoginPanel extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Use your email or username and keep your trip planning session synced through Clerk.',
+                'Set up your traveler profile and keep planning under Clerk.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: NavTripPalette.mutedInk,
                     ),
@@ -262,6 +279,10 @@ class _LoginPanel extends StatelessWidget {
                 _MessageBanner(message: auth.errorMessage!, isError: true),
                 const SizedBox(height: 12),
               ],
+              if (auth.verificationMessage != null) ...[
+                _MessageBanner(message: auth.verificationMessage!, isError: false),
+                const SizedBox(height: 12),
+              ],
               Container(
                 decoration: NavTripStyles.polaroidCard(),
                 padding: const EdgeInsets.all(20),
@@ -269,17 +290,33 @@ class _LoginPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     TextFormField(
-                      controller: identifierController,
-                      keyboardType: TextInputType.text,
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(labelText: 'Email or username'),
-                      validator: (value) => (value?.trim().isEmpty ?? true) ? 'Enter your email or username.' : null,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                      validator: (value) {
+                        final text = value?.trim() ?? '';
+                        if (text.isEmpty) {
+                          return 'Enter your email.';
+                        }
+                        if (!text.contains('@')) {
+                          return 'Enter a valid email address.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: usernameController,
+                      textInputAction: TextInputAction.next,
+                      decoration: const InputDecoration(labelText: 'Username'),
+                      validator: (value) => (value?.trim().isEmpty ?? true) ? 'Enter a username.' : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: passwordController,
                       obscureText: obscurePassword,
-                      textInputAction: TextInputAction.done,
+                      textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         suffixIcon: IconButton(
@@ -287,7 +324,37 @@ class _LoginPanel extends StatelessWidget {
                           icon: Icon(obscurePassword ? Icons.visibility_off : Icons.visibility),
                         ),
                       ),
-                      validator: (value) => (value?.isEmpty ?? true) ? 'Enter your password.' : null,
+                      validator: (value) {
+                        if ((value ?? '').isEmpty) {
+                          return 'Enter a password.';
+                        }
+                        if ((value ?? '').length < 8) {
+                          return 'Use at least 8 characters.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: confirmPasswordController,
+                      obscureText: obscureConfirmPassword,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        labelText: 'Confirm password',
+                        suffixIcon: IconButton(
+                          onPressed: onToggleConfirmPassword,
+                          icon: Icon(obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                        ),
+                      ),
+                      validator: (value) {
+                        if ((value ?? '').isEmpty) {
+                          return 'Confirm your password.';
+                        }
+                        if (value != passwordController.text) {
+                          return 'Passwords do not match.';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 18),
                     FilledButton(
@@ -298,7 +365,7 @@ class _LoginPanel extends StatelessWidget {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Sign In'),
+                          : const Text('Sign Up'),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
@@ -306,13 +373,19 @@ class _LoginPanel extends StatelessWidget {
                       icon: const Icon(Icons.g_mobiledata),
                       label: const Text('Continue with Google'),
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'If Clerk requires email verification, you will be prompted to verify before the app opens your dashboard.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: NavTripPalette.mutedInk),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               TextButton(
-                onPressed: onSignUp,
-                child: const Text('Need an account? Sign Up'),
+                onPressed: onLogin,
+                child: const Text('Already have an account? Sign In'),
               ),
               if (redirectTo != null) ...[
                 const SizedBox(height: 8),

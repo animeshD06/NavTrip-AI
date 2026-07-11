@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/tourist_place.dart';
+import '../providers/auth_provider.dart';
 import '../providers/trip_planner_controller.dart';
 import '../theme/navtrip_theme.dart';
 import 'itinerary_screen.dart';
@@ -33,6 +34,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     final controller = context.watch<TripPlannerController>();
     final width = MediaQuery.sizeOf(context).width;
     final isDesktop = width >= 960;
@@ -51,10 +53,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   110,
                 ),
                 children: [
-                  _TopBar(onSignIn: () => Navigator.of(context).pushNamed('/login')),
+                  _TopBar(
+                    auth: auth,
+                    onSignIn: () => Navigator.of(context).pushNamed('/login'),
+                    onProfile: () => _showProfileMenu(context, auth),
+                  ),
                   const SizedBox(height: 28),
                   _WelcomeHeader(
                     destination: controller.destination,
+                    userName: auth.currentUser?.displayName ?? 'Traveler',
                     connected: controller.backendConnected,
                     status: controller.backendStatus,
                     onReconnect: controller.isCheckingBackend ? null : () async {
@@ -113,20 +120,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _toast(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
+
+  Future<void> _showProfileMenu(BuildContext context, AuthProvider auth) async {
+    final user = auth.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Profile', style: Theme.of(sheetContext).textTheme.headlineMedium),
+              const SizedBox(height: 16),
+              _ProfileInfoRow(label: 'User ID', value: user.id),
+              const SizedBox(height: 10),
+              _ProfileInfoRow(label: 'Username', value: user.username.isEmpty ? 'Not set' : user.username),
+              const SizedBox(height: 10),
+              _ProfileInfoRow(label: 'Email', value: user.email.isEmpty ? 'Not set' : user.email),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: () async {
+                  Navigator.of(sheetContext).pop();
+                  await auth.signOut();
+                  if (!mounted) {
+                    return;
+                  }
+                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onSignIn});
+  const _TopBar({
+    required this.auth,
+    required this.onSignIn,
+    required this.onProfile,
+  });
 
+  final AuthProvider auth;
   final VoidCallback onSignIn;
+  final VoidCallback onProfile;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('NavTrip-AI', style: Theme.of(context).textTheme.displayMedium?.copyWith(color: NavTripPalette.terracottaDeep, fontSize: MediaQuery.sizeOf(context).width < 600 ? 34 : 44)),
-        TextButton(onPressed: onSignIn, child: const Text('Sign In')),
+        Text(
+          'NavTrip-AI',
+          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                color: NavTripPalette.terracottaDeep,
+                fontSize: MediaQuery.sizeOf(context).width < 600 ? 34 : 44,
+              ),
+        ),
+        auth.isAuthenticated
+            ? OutlinedButton.icon(
+                onPressed: onProfile,
+                icon: const Icon(Icons.person_outline),
+                label: Text(auth.currentUser?.displayName ?? 'Profile'),
+              )
+            : TextButton(onPressed: onSignIn, child: const Text('Sign In')),
       ],
     );
   }
@@ -135,12 +203,14 @@ class _TopBar extends StatelessWidget {
 class _WelcomeHeader extends StatelessWidget {
   const _WelcomeHeader({
     required this.destination,
+    required this.userName,
     required this.connected,
     required this.status,
     required this.onReconnect,
   });
 
   final String destination;
+  final String userName;
   final bool connected;
   final String status;
   final VoidCallback? onReconnect;
@@ -150,11 +220,20 @@ class _WelcomeHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Welcome Back, Julian', style: Theme.of(context).textTheme.displayLarge?.copyWith(color: NavTripPalette.terracotta, fontSize: MediaQuery.sizeOf(context).width < 600 ? 36 : 54)),
+        Text(
+          'Welcome Back, $userName',
+          style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                color: NavTripPalette.terracotta,
+                fontSize: MediaQuery.sizeOf(context).width < 600 ? 36 : 54,
+              ),
+        ),
         const SizedBox(height: 8),
         Text(
           '"Not all those who wander are lost, but some need a better map."',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: NavTripPalette.mutedInk, fontStyle: FontStyle.italic),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: NavTripPalette.mutedInk,
+                fontStyle: FontStyle.italic,
+              ),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -174,6 +253,41 @@ class _WelcomeHeader extends StatelessWidget {
                 onPressed: onReconnect,
               ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfileInfoRow extends StatelessWidget {
+  const _ProfileInfoRow({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 96,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: NavTripPalette.mutedInk,
+                ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
       ],
     );
@@ -395,7 +509,7 @@ class _TripCardState extends State<_TripCard> {
                         child: AnimatedScale(
                           duration: const Duration(milliseconds: 400),
                           scale: _hovered ? 1.05 : 1,
-                          child: Image.network(widget.image, fit: BoxFit.cover),
+                          child: Image.network(widget.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
                         ),
                       ),
                     ),
@@ -537,7 +651,7 @@ class _TimelineAndMapSection extends StatelessWidget {
               Positioned.fill(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(14),
-                  child: Opacity(opacity: 0.62, child: Image.network('https://lh3.googleusercontent.com/aida-public/AB6AXuDqSr-jDZ3s6sJ4MHVblLt9e-M5iEWpK60asKVE_30veuVDeQXEIT3nErCK9WawEgngsA5OrM20FTWtwaDk8xx4gVQb_XnB7HB05-_JRuPaNkZpO-t4WtFNdg5Z5_zmJe7B4A3ifbPN_yRgUEVOJdZtc_mDW1aJ-M5F5SgVuBrQ7n6NpdtnQnkuHEmZxBTmmNTlGwwA1hsMlh7c48gIJjKt1F6GUNqjKMhW6_SR3vr9-rzm1P0TqzG10OxZLr_g7-mVRSPtcy-ecQWH', fit: BoxFit.cover)),
+                  child: Opacity(opacity: 0.62, child: Image.network('https://lh3.googleusercontent.com/aida-public/AB6AXuDqSr-jDZ3s6sJ4MHVblLt9e-M5iEWpK60asKVE_30veuVDeQXEIT3nErCK9WawEgngsA5OrM20FTWtwaDk8xx4gVQb_XnB7HB05-_JRuPaNkZpO-t4WtFNdg5Z5_zmJe7B4A3ifbPN_yRgUEVOJdZtc_mDW1aJ-M5F5SgVuBrQ7n6NpdtnQnkuHEmZxBTmmNTlGwwA1hsMlh7c48gIJjKt1F6GUNqjKMhW6_SR3vr9-rzm1P0TqzG10OxZLr_g7-mVRSPtcy-ecQWH', fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink())),
                 ),
               ),
               Positioned(
@@ -772,6 +886,17 @@ final List<TouristPlace> _samplePlaces = [
     closingTime: '20:00',
   ),
 ];
+
+
+
+
+
+
+
+
+
+
+
 
 
 

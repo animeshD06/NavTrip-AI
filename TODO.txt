@@ -1,0 +1,10 @@
+NavTrip AI To Do
+
+- [ ] Add a valid `CLERK_PUBLISHABLE_KEY` to `frontend/.env` and restart the app.
+- [ ] Finish Clerk Dashboard setup: email auth, password auth, username auth, Google OAuth, and Native API.
+- [ ] Verify Google OAuth redirect setup for Android and iOS.
+- [ ] Test sign-up with email, username, and password on a real device or emulator.
+- [ ] Test sign-in with username + password and email + password.
+- [ ] Test Google sign-in round-trip and email verification flow.
+- [ ] Confirm session restore after a full app restart.
+- [ ] Decide whether the old backend `/api/auth/login` and `/api/auth/register` endpoints should stay separate from Clerk or be removed.

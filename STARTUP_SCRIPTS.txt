@@ -1,0 +1,14 @@
+NavTrip AI startup scripts
+
+Backend:
+cd backend
+node src/server.js
+
+Frontend:
+cd frontend
+..\run_frontend.bat
+
+Notes:
+- Backend defaults to the Node server entrypoint defined in backend/package.json.
+- Frontend is a Flutter app, so run it with the local Flutter SDK bundled in tools/flutter.
+- run_frontend.ps1 temporarily maps the repo to a drive letter so Flutter avoids the space-in-path issue on Windows.

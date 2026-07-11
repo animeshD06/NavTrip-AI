@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class NavTripPalette {
   static const surface = Color(0xfff9f9f8);
@@ -274,17 +274,24 @@ class PaperTexture extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
+          child: DecoratedBox(
+            decoration: NavTripStyles.paperBackground(),
+          ),
+        ),
+        Positioned.fill(
           child: IgnorePointer(
             child: Opacity(
               opacity: opacity,
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      'https://www.transparenttextures.com/patterns/felt.png',
-                    ),
-                    repeat: ImageRepeat.repeat,
-                    fit: BoxFit.none,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.16),
+                      Colors.transparent,
+                      Colors.white.withOpacity(0.08),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
               ),
@@ -295,9 +302,7 @@ class PaperTexture extends StatelessWidget {
       ],
     );
   }
-}
-
-class SectionHeading extends StatelessWidget {
+}class SectionHeading extends StatelessWidget {
   const SectionHeading({
     required this.title,
     this.subtitle,
@@ -328,5 +333,6 @@ class SectionHeading extends StatelessWidget {
     );
   }
 }
+
 
 

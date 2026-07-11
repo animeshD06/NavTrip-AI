@@ -1,4 +1,4 @@
-ï»¿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/itinerary.dart';
@@ -307,13 +307,13 @@ class _TimelineItem extends StatelessWidget {
                   Text(place.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: NavTripPalette.terracottaDeep)),
                   const SizedBox(height: 6),
                   Text(
-                    '${place.category} â€¢ ${place.estimatedVisitMinutes} min',
+                    '${place.category} • ${place.estimatedVisitMinutes} min',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(color: NavTripPalette.mutedInk),
                   ),
                   const SizedBox(height: 4),
                   if (place.sequenceOrder > 1)
                     Text(
-                      '${place.travelDistanceKm.toStringAsFixed(1)} km from previous â€¢ about ${place.estimatedTravelMinutes} min',
+                      '${place.travelDistanceKm.toStringAsFixed(1)} km from previous • about ${place.estimatedTravelMinutes} min',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(color: NavTripPalette.mutedInk),
                     ),
                   const SizedBox(height: 4),
@@ -350,7 +350,7 @@ class _SidebarWidgets extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              _KeyValueRow(label: 'Current', value: '-2Â°C'),
+              _KeyValueRow(label: 'Current', value: '-2°C'),
               _KeyValueRow(label: 'Wind', value: '24 km/h'),
               const SizedBox(height: 10),
               Text('Pack layers. The wind bites today.', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic, color: NavTripPalette.mutedInk)),
@@ -493,6 +493,7 @@ class _SummaryChip extends StatelessWidget {
     );
   }
 }
+
 
 
 

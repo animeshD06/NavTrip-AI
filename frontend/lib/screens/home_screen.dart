@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../theme/navtrip_theme.dart';
 
@@ -425,7 +425,7 @@ class _JourneyStepTile extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(2),
-                child: Image.network(data.image, height: 220, width: double.infinity, fit: BoxFit.cover),
+                child: Image.network(data.image, height: 220, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
               ),
             ),
           ),
@@ -587,7 +587,7 @@ class _DestinationCardState extends State<_DestinationCard> {
               AnimatedScale(
                 duration: const Duration(milliseconds: 500),
                 scale: _hovered ? 1.08 : 1.0,
-                child: Image.network(widget.image, fit: BoxFit.cover),
+                child: Image.network(widget.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
               ),
               const DecoratedBox(
                 decoration: BoxDecoration(
@@ -733,5 +733,6 @@ class _FabItem extends StatelessWidget {
     );
   }
 }
+
 
 
