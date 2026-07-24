@@ -1,15 +1,17 @@
-﻿import 'package:clerk_auth/clerk_auth.dart' show User;
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 class AppUser {
   const AppUser({
     required this.id,
     required this.email,
     required this.username,
+    required this.emailVerified,
   });
 
   final String id;
   final String email;
   final String username;
+  final bool emailVerified;
 
   String get displayName {
     if (username.trim().isNotEmpty) {
@@ -23,11 +25,12 @@ class AppUser {
     return id;
   }
 
-  factory AppUser.fromClerk(User user) {
+  factory AppUser.fromFirebase(firebase_auth.User user) {
     return AppUser(
-      id: user.id,
+      id: user.uid,
       email: user.email ?? '',
-      username: user.username ?? '',
+      username: user.displayName ?? '',
+      emailVerified: user.emailVerified,
     );
   }
 }

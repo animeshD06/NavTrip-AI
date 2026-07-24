@@ -34,13 +34,16 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
-    if (auth.isAuthenticated && !_redirectQueued) {
+    if (auth.isAuthenticated &&
+        auth.needsVerification == false &&
+        !_redirectQueued) {
       _redirectQueued = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
           return;
         }
-        Navigator.of(context).pushReplacementNamed(widget.redirectTo ?? '/dashboard');
+        Navigator.of(context)
+            .pushReplacementNamed(widget.redirectTo ?? '/dashboard');
       });
     }
 
@@ -61,10 +64,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             identifierController: _identifierController,
                             passwordController: _passwordController,
                             obscurePassword: _obscurePassword,
-                            onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
+                            onTogglePassword: () => setState(
+                                () => _obscurePassword = !_obscurePassword),
                             onSubmit: _submit,
                             onGoogle: _googleSignIn,
-                            onSignUp: () => Navigator.of(context).pushReplacementNamed(
+                            onSignUp: () =>
+                                Navigator.of(context).pushReplacementNamed(
                               '/signup',
                               arguments: widget.redirectTo,
                             ),
@@ -85,10 +90,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             identifierController: _identifierController,
                             passwordController: _passwordController,
                             obscurePassword: _obscurePassword,
-                            onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
+                            onTogglePassword: () => setState(
+                                () => _obscurePassword = !_obscurePassword),
                             onSubmit: _submit,
                             onGoogle: _googleSignIn,
-                            onSignUp: () => Navigator.of(context).pushReplacementNamed(
+                            onSignUp: () =>
+                                Navigator.of(context).pushReplacementNamed(
                               '/signup',
                               arguments: widget.redirectTo,
                             ),
@@ -124,7 +131,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (context.read<AuthProvider>().isAuthenticated) {
-      Navigator.of(context).pushReplacementNamed(widget.redirectTo ?? '/dashboard');
+      Navigator.of(context)
+          .pushReplacementNamed(widget.redirectTo ?? '/dashboard');
     }
   }
 
@@ -138,7 +146,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (context.read<AuthProvider>().isAuthenticated) {
-      Navigator.of(context).pushReplacementNamed(widget.redirectTo ?? '/dashboard');
+      Navigator.of(context)
+          .pushReplacementNamed(widget.redirectTo ?? '/dashboard');
     }
   }
 }
@@ -156,43 +165,61 @@ class _StoryPanel extends StatelessWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                decoration: NavTripStyles.polaroidCard(),
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(2),
-                      child: Image.network(
-                        'https://lh3.googleusercontent.com/aida-public/AB6AXuBF0XU3AL3w_e-ZuAMqI7naht3rDkZdQvuvPqu6bd9XrMhmQSQIMVZ8mg4mCcmtdJEbLljiiQr-ggnLSSnHGtKNqATWqyZ6mAZgn16MjURSw-9cwJmIcZ_lGdokYD5p6RlrxowTfj38oWvCpN7bMvOxgqTsVgoq17ZuoL0YQeQ2q88ntdXlwKYtsG2fPn8Q_8Oar3UVjsgG_s06EcKM3TbmEtH1mJBVehqXcpvhKvec4xjCtw0FsGYKc1egfIr-5brhv1fJN4PDxd5r',
-                        height: large ? 460 : 240,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableHeight = constraints.maxHeight;
+              final imageHeight = large && availableHeight.isFinite
+                  ? (availableHeight * 0.54).clamp(300.0, 460.0).toDouble()
+                  : (large ? 460.0 : 240.0);
+
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Container(
+                      decoration: NavTripStyles.polaroidCard(),
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: Image.network(
+                                'https://lh3.googleusercontent.com/aida-public/AB6AXuBF0XU3AL3w_e-ZuAMqI7naht3rDkZdQvuvPqu6bd9XrMhmQSQIMVZ8mg4mCcmtdJEbLljiiQr-ggnLSSnHGtKNqATWqyZ6mAZgn16MjURSw-9cwJmIcZ_lGdokYD5p6RlrxowTfj38oWvCpN7bMvOxgqTsVgoq17ZuoL0YQeQ2q88ntdXlwKYtsG2fPn8Q_8Oar3UVjsgG_s06EcKM3TbmEtH1mJBVehqXcpvhKvec4xjCtw0FsGYKc1egfIr-5brhv1fJN4PDxd5r',
+                                height: imageHeight,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'Capture the journey.',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: NavTripPalette.mutedInk,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Capture the journey.',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: NavTripPalette.mutedInk,
-                            fontStyle: FontStyle.italic,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Icon(Icons.travel_explore, color: NavTripPalette.terracotta, size: 34),
-              const SizedBox(height: 8),
-              Text(
-                'Make planning feel like keeping a travel journal.',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Icon(Icons.travel_explore,
+                      color: NavTripPalette.terracotta, size: 34),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Make planning feel like keeping a travel journal.',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -252,7 +279,7 @@ class _LoginPanel extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Use your email or username and keep your trip planning session synced through Clerk.',
+                'Use your email and password to keep your trip planning session synced with Firebase.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: NavTripPalette.mutedInk,
                     ),
@@ -260,6 +287,11 @@ class _LoginPanel extends StatelessWidget {
               const SizedBox(height: 24),
               if (auth.errorMessage != null) ...[
                 _MessageBanner(message: auth.errorMessage!, isError: true),
+                const SizedBox(height: 12),
+              ],
+              if (auth.verificationMessage != null) ...[
+                _MessageBanner(
+                    message: auth.verificationMessage!, isError: false),
                 const SizedBox(height: 12),
               ],
               Container(
@@ -270,10 +302,13 @@ class _LoginPanel extends StatelessWidget {
                   children: [
                     TextFormField(
                       controller: identifierController,
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(labelText: 'Email or username'),
-                      validator: (value) => (value?.trim().isEmpty ?? true) ? 'Enter your email or username.' : null,
+                      decoration:
+                          const InputDecoration(labelText: 'Email address'),
+                      validator: (value) => (value?.trim().isEmpty ?? true)
+                          ? 'Enter your email address.'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -284,10 +319,14 @@ class _LoginPanel extends StatelessWidget {
                         labelText: 'Password',
                         suffixIcon: IconButton(
                           onPressed: onTogglePassword,
-                          icon: Icon(obscurePassword ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                         ),
                       ),
-                      validator: (value) => (value?.isEmpty ?? true) ? 'Enter your password.' : null,
+                      validator: (value) => (value?.isEmpty ?? true)
+                          ? 'Enter your password.'
+                          : null,
                     ),
                     const SizedBox(height: 18),
                     FilledButton(
@@ -319,7 +358,10 @@ class _LoginPanel extends StatelessWidget {
                 Text(
                   'You will return to $redirectTo after authentication.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: NavTripPalette.mutedInk),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: NavTripPalette.mutedInk),
                 ),
               ],
             ],
@@ -345,7 +387,8 @@ class _MessageBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isError ? const Color(0xffffe5e1) : const Color(0xfffff6d8),
-        border: Border.all(color: isError ? NavTripPalette.error : const Color(0xffc8b26b)),
+        border: Border.all(
+            color: isError ? NavTripPalette.error : const Color(0xffc8b26b)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -357,4 +400,3 @@ class _MessageBanner extends StatelessWidget {
     );
   }
 }
-

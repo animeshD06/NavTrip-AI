@@ -1,6 +1,5 @@
-﻿import { clerkMiddleware } from '@clerk/express';
-import cors from 'cors';
 import express from 'express';
+import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
@@ -26,7 +25,6 @@ import weatherCrowdRoutes from './routes/weather-crowd.routes.js';
 import { httpError, sendError } from './utils/http.js';
 
 const app = express();
-const clerkEnabled = Boolean(process.env.CLERK_SECRET_KEY && process.env.CLERK_PUBLISHABLE_KEY);
 
 function isLoopbackOrigin(origin) {
   try {
@@ -71,7 +69,6 @@ app.use(
 );
 app.use(express.json());
 app.use(morgan('dev'));
-app.use(clerkEnabled ? clerkMiddleware() : (req, res, next) => next());
 
 app.get('/', (req, res) => {
   res.json({

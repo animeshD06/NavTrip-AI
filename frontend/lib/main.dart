@@ -1,24 +1,22 @@
-import 'package:clerk_auth/clerk_auth.dart' as clerk;
-import 'package:clerk_flutter/clerk_flutter.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:provider/provider.dart';
 
-import 'config/auth_config.dart';
-import 'providers/auth_provider.dart';
-import 'providers/trip_planner_controller.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/itinerary_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/signup_screen.dart';
-import 'screens/tourist_map_screen.dart';
-import 'services/api_client.dart';
-import 'services/noop_clerk_file_cache.dart';
-import 'theme/navtrip_theme.dart';
-import 'widgets/auth_guard.dart';
+import 'package:navtrip_ai/config/firebase_config.dart';
+import 'package:navtrip_ai/providers/auth_provider.dart';
+import 'package:navtrip_ai/providers/trip_planner_controller.dart';
+import 'package:navtrip_ai/screens/dashboard_screen.dart';
+import 'package:navtrip_ai/screens/home_screen.dart';
+import 'package:navtrip_ai/screens/login_screen.dart';
+import 'package:navtrip_ai/screens/signup_screen.dart';
+import 'package:navtrip_ai/screens/tourist_map_screen.dart';
+import 'package:navtrip_ai/services/api_client.dart';
+import 'package:navtrip_ai/theme/navtrip_theme.dart';
+import 'package:navtrip_ai/widgets/auth_guard.dart';
 
 void main() {
+  usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const NavTripApp());
 }
@@ -36,7 +34,36 @@ class NavTripApp extends StatefulWidget {
 }
 
 class _NavTripAppState extends State<NavTripApp> {
-  late final Future<void> _bootstrapFuture = AuthConfig.load();
+  late final Future<void> _bootstrapFuture = _bootstrap();
+  late final String _initialRoute = _resolveInitialRoute();
+
+  String _resolveInitialRoute() {
+    final path = Uri.base.path.trim();
+    if (path.isEmpty || path == '/') {
+      return '/';
+    }
+    return path.startsWith('/') ? path : '/$path';
+  }
+
+  Future<void> _bootstrap() async {
+    await FirebaseConfig.load();
+    if (!FirebaseConfig.hasConfig) {
+      throw StateError(
+          'Firebase config is missing. Add FIREBASE_* values to frontend/.env.');
+    }
+    await Firebase.initializeApp(options: FirebaseConfig.options);
+  }
+
+  Map<String, WidgetBuilder> _bootstrapRoutes(WidgetBuilder fallbackBuilder) {
+    return {
+      '/': fallbackBuilder,
+      '/login': fallbackBuilder,
+      '/signup': fallbackBuilder,
+      '/dashboard': fallbackBuilder,
+      '/trip-details': fallbackBuilder,
+      '/trip-map': fallbackBuilder,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,53 +75,47 @@ class _NavTripAppState extends State<NavTripApp> {
             title: 'NavTrip AI',
             debugShowCheckedModeBanner: false,
             theme: NavTripStyles.theme(),
-            home: const _ClerkBootstrapScreen(),
+            routes: _bootstrapRoutes((_) => const _BootstrapLoadingScreen()),
+            initialRoute: _initialRoute,
           );
         }
 
         if (snapshot.hasError) {
+          final message =
+              snapshot.error?.toString() ?? 'Failed to initialize Firebase.';
+          final missingFirebaseConfig = message.contains('FIREBASE_');
+          final failureScreen = missingFirebaseConfig
+              ? const _MissingFirebaseConfigScreen()
+              : _StartupFailureScreen(error: snapshot.error);
+
           return MaterialApp(
             title: 'NavTrip AI',
             debugShowCheckedModeBanner: false,
             theme: NavTripStyles.theme(),
-            home: _StartupFailureScreen(error: snapshot.error),
+            routes: _bootstrapRoutes((_) => failureScreen),
+            initialRoute: _initialRoute,
           );
         }
 
-        if (!AuthConfig.hasPublishableKey) {
-          return MaterialApp(
-            title: 'NavTrip AI',
-            debugShowCheckedModeBanner: false,
-            theme: NavTripStyles.theme(),
-            home: const _MissingAuthConfigScreen(),
-          );
-        }
-
-        return ClerkAuth(
-          config: ClerkAuthConfig(
-            fileCache: kIsWeb ? const NoOpClerkFileCache() : null,
-            persistor: kIsWeb ? clerk.Persistor.none : null,
-            publishableKey: AuthConfig.publishableKey,
-            redirectionGenerator: AuthConfig.redirectUriGenerator,
-            deepLinkStream: AuthConfig.deepLinkStream(),
-            loading: const _ClerkBootstrapScreen(),
-          ),
-          child: MultiProvider(
-            providers: [
-              ChangeNotifierProvider<AuthProvider>(
-                create: (_) => AuthProvider(),
-              ),
-              Provider<ApiClient>(
-                create: (_) => ApiClient(),
-              ),
-              ChangeNotifierProxyProvider<ApiClient, TripPlannerController>(
-                create: (context) => TripPlannerController(context.read<ApiClient>()),
-                update: (_, apiClient, controller) {
-                  return controller ?? TripPlannerController(apiClient);
-                },
-              ),
-            ],
-            child: _ClerkBoundApp(loadPlacesOnStart: widget.loadPlacesOnStart),
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthProvider>(
+              create: (_) => AuthProvider(),
+            ),
+            Provider<ApiClient>(
+              create: (_) => ApiClient(),
+            ),
+            ChangeNotifierProxyProvider<ApiClient, TripPlannerController>(
+              create: (context) =>
+                  TripPlannerController(context.read<ApiClient>()),
+              update: (_, apiClient, controller) {
+                return controller ?? TripPlannerController(apiClient);
+              },
+            ),
+          ],
+          child: _NavTripAppShell(
+            initialRoute: _initialRoute,
+            loadPlacesOnStart: widget.loadPlacesOnStart,
           ),
         );
       },
@@ -102,30 +123,14 @@ class _NavTripAppState extends State<NavTripApp> {
   }
 }
 
-class _ClerkBoundApp extends StatefulWidget {
-  const _ClerkBoundApp({required this.loadPlacesOnStart});
+class _NavTripAppShell extends StatelessWidget {
+  const _NavTripAppShell({
+    required this.initialRoute,
+    required this.loadPlacesOnStart,
+  });
 
+  final String initialRoute;
   final bool loadPlacesOnStart;
-
-  @override
-  State<_ClerkBoundApp> createState() => _ClerkBoundAppState();
-}
-
-class _ClerkBoundAppState extends State<_ClerkBoundApp> {
-  bool _restoredSession = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final authState = ClerkAuth.of(context);
-    final authProvider = context.read<AuthProvider>();
-    authProvider.attach(authState);
-
-    if (!_restoredSession) {
-      _restoredSession = true;
-      authProvider.restoreSession();
-    }
-  }
 
   String? _redirectTarget(BuildContext context) {
     final arguments = ModalRoute.of(context)?.settings.arguments;
@@ -141,24 +146,26 @@ class _ClerkBoundAppState extends State<_ClerkBoundApp> {
       title: 'NavTrip AI',
       debugShowCheckedModeBanner: false,
       theme: NavTripStyles.theme(),
+      initialRoute: initialRoute,
       routes: {
-        '/': (_) => _HomeRouteGate(loadPlacesOnStart: widget.loadPlacesOnStart),
-        '/login': (context) => LoginScreen(redirectTo: _redirectTarget(context)),
-        '/signup': (context) => SignUpScreen(redirectTo: _redirectTarget(context)),
+        '/': (_) => _HomeRouteGate(loadPlacesOnStart: loadPlacesOnStart),
+        '/login': (context) =>
+            LoginScreen(redirectTo: _redirectTarget(context)),
+        '/signup': (context) =>
+            SignUpScreen(redirectTo: _redirectTarget(context)),
         '/dashboard': (_) => const AuthGuard(
               protectedRoute: '/dashboard',
               child: DashboardScreen(),
             ),
         '/trip-details': (_) => const AuthGuard(
               protectedRoute: '/trip-details',
-              child: ItineraryScreen(),
+              child: TouristMapScreen(),
             ),
         '/trip-map': (_) => const AuthGuard(
               protectedRoute: '/trip-map',
               child: TouristMapScreen(),
             ),
       },
-      initialRoute: '/',
     );
   }
 }
@@ -180,6 +187,17 @@ class _HomeRouteGateState extends State<_HomeRouteGate> {
     final auth = context.watch<AuthProvider>();
 
     if (!auth.isReady) {
+      return const _BootstrapLoadingScreen();
+    }
+
+    if (auth.isAuthenticated && auth.needsVerification && !_redirectQueued) {
+      _redirectQueued = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        Navigator.of(context).pushReplacementNamed('/signup');
+      });
       return const _BootstrapLoadingScreen();
     }
 
@@ -207,6 +225,7 @@ class _BootstrapLoadingScreen extends StatelessWidget {
     );
   }
 }
+
 class _StartupFailureScreen extends StatelessWidget {
   const _StartupFailureScreen({this.error});
 
@@ -231,13 +250,14 @@ class _StartupFailureScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Startup failed',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: NavTripPalette.terracottaDeep,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: NavTripPalette.terracottaDeep,
+                              ),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'NavTrip AI could not finish its initial setup. The most likely cause is Clerk config loading or an invalid auth environment.',
+                      'NavTrip AI could not finish its initial setup. The most likely cause is Firebase config loading or an invalid auth environment.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     if (message != null && message.isNotEmpty) ...[
@@ -260,59 +280,8 @@ class _StartupFailureScreen extends StatelessWidget {
   }
 }
 
-class _ClerkBootstrapScreen extends StatelessWidget {
-  const _ClerkBootstrapScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: NavTripStyles.theme(),
-      home: Scaffold(
-        body: PaperTexture(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Container(
-                decoration: NavTripStyles.paperCard(radius: 18),
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: CircularProgressIndicator(strokeWidth: 3),
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'Starting NavTrip AI',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: NavTripPalette.terracottaDeep,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Clerk is loading your session and redirect settings.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: NavTripPalette.mutedInk,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MissingAuthConfigScreen extends StatelessWidget {
-  const _MissingAuthConfigScreen();
+class _MissingFirebaseConfigScreen extends StatelessWidget {
+  const _MissingFirebaseConfigScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -331,19 +300,20 @@ class _MissingAuthConfigScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Clerk publishable key missing',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: NavTripPalette.terracottaDeep,
-                          ),
+                      'Firebase config missing',
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: NavTripPalette.terracottaDeep,
+                              ),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Add CLERK_PUBLISHABLE_KEY to frontend/.env, then restart the app.',
+                      'Add the Firebase values to frontend/.env, then restart the app.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'The app now boots with Clerk Auth, but it cannot initialize without the dashboard key.',
+                      'The app now boots with Firebase Auth, but it cannot initialize without the project keys.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: NavTripPalette.mutedInk,
                           ),
@@ -358,13 +328,3 @@ class _MissingAuthConfigScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-

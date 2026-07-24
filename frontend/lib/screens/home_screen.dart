@@ -43,8 +43,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   _TopNav(
                     onExplore: () => _scrollToKey(_stepsKey),
-                    onPlanner: () => Navigator.of(context).pushNamed('/dashboard'),
-                    onTrips: () => Navigator.of(context).pushNamed('/trip-details'),
+                    onPlanner: () =>
+                        Navigator.of(context).pushNamed('/dashboard'),
+                    onTrips: () =>
+                        Navigator.of(context).pushNamed('/trip-details'),
                     onSignIn: () => Navigator.of(context).pushNamed('/login'),
                     mobile: !isDesktop,
                   ),
@@ -60,7 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           setState(() => _stickyHover = value);
                         }
                       },
-                      onPrimaryAction: () => Navigator.of(context).pushNamed('/dashboard'),
+                      onPrimaryAction: () =>
+                          Navigator.of(context).pushNamed('/dashboard'),
                       onSecondaryAction: () => _scrollToKey(_stepsKey),
                     ),
                   ),
@@ -148,31 +151,48 @@ class _TopNav extends StatelessWidget {
       ),
       padding: EdgeInsets.symmetric(horizontal: mobile ? 20 : 64, vertical: 18),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('NavTrip-AI', style: Theme.of(context).textTheme.displayMedium?.copyWith(color: NavTripPalette.terracottaDeep, fontSize: mobile ? 34 : 44)),
-          if (!mobile)
-            Row(
-              children: [
-                TextButton(onPressed: onExplore, child: const Text('Explore')),
-                const SizedBox(width: 18),
-                TextButton(onPressed: onPlanner, child: const Text('Planner')),
-                const SizedBox(width: 18),
-                TextButton(onPressed: onTrips, child: const Text('My Trips')),
-                const SizedBox(width: 18),
-                FilledButton(
-                  onPressed: onSignIn,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          Expanded(
+            child: Text(
+              'NavTrip-AI',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  color: NavTripPalette.terracottaDeep,
+                  fontSize: mobile ? 34 : 44),
+            ),
+          ),
+          if (!mobile) ...[
+            const SizedBox(width: 24),
+            Flexible(
+              fit: FlexFit.loose,
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 18,
+                runSpacing: 8,
+                children: [
+                  TextButton(
+                      onPressed: onExplore, child: const Text('Explore')),
+                  TextButton(
+                      onPressed: onPlanner, child: const Text('Planner')),
+                  TextButton(onPressed: onTrips, child: const Text('My Trips')),
+                  FilledButton(
+                    onPressed: onSignIn,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 22, vertical: 14),
+                    ),
+                    child: const Text('Sign In'),
                   ),
-                  child: const Text('Sign In'),
-                ),
-              ],
-            )
-          else
+                ],
+              ),
+            ),
+          ] else
             IconButton(
               onPressed: onSignIn,
-              icon: const Icon(Icons.menu, color: NavTripPalette.terracottaDeep),
+              icon:
+                  const Icon(Icons.menu, color: NavTripPalette.terracottaDeep),
             ),
         ],
       ),
@@ -268,10 +288,11 @@ class _HeroSection extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Kyoto, 2024',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontStyle: FontStyle.italic,
-                                color: NavTripPalette.mutedInk,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontStyle: FontStyle.italic,
+                                    color: NavTripPalette.mutedInk,
+                                  ),
                         ),
                       ],
                     ),
@@ -283,7 +304,8 @@ class _HeroSection extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  transform: Matrix4.translationValues(stickyHover ? 10.0 : 0.0, stickyHover ? -8.0 : 0.0, 0.0)
+                  transform: Matrix4.translationValues(
+                      stickyHover ? 10.0 : 0.0, stickyHover ? -8.0 : 0.0, 0.0)
                     ..rotateZ(stickyHover ? -0.03 : -0.05),
                   child: Container(
                     width: 190,
@@ -325,19 +347,22 @@ class _JourneyStepsSection extends StatelessWidget {
     final steps = [
       _JourneyStepData(
         title: 'Curate Your Muse',
-        body: 'Describe your dream vibe. Whether it is cobblestone cafes or neon-lit skylines, the planner listens for mood first.',
+        body:
+            'Describe your dream vibe. Whether it is cobblestone cafes or neon-lit skylines, the planner listens for mood first.',
         image:
             'https://lh3.googleusercontent.com/aida-public/AB6AXuDpSdAuxc6dy7lfNXuZ7twkJAlNHf9SQ0PYgmRamCAMvs5bTLczWOX-dnSBDCo6CIe7JQWYvHvtkc2w7lGCba26MyaPLUglsT4AHGRvR5R522qLI4kLwDy542D5CwxrvSZh3ySYE-h95vYT7fnIGDtJ6lddL_p0MbecpYMan-5ZrpEUwRn6Zt21GtU-lEZ6iCI4DaP48WbyGKbPnI-9uuvxynVTeSORc_IhMPvAoxSqlNu1bWmA78soPR-6BzcAduDb7uoBV3YgKsgS',
       ),
       _JourneyStepData(
         title: 'Precision Routing',
-        body: 'Watch as ideas turn into a logical day plan. Logistics quietly fall into place while the timeline stays beautiful.',
+        body:
+            'Watch as ideas turn into a logical day plan. Logistics quietly fall into place while the timeline stays beautiful.',
         image:
             'https://lh3.googleusercontent.com/aida-public/AB6AXuDRpFXG1Fa46N8fnNfSf8ICeYzNmolpXUgu4jXbP8ztVfuOIQlYaWQ6iNV-lL-GvKCz-1VceN1uB2eh1ZNZxDVL8RaP-P4-DtGfljwxFr_52MfP2aQuvwH3GXVTXStYhFHl3cgAAofRo_Pw_t7a0st6zMyVmBdIAxKaj0rrmHQxTutpbbH4Lem9BsX5FQqtUYt-QpyFJz0KicXnnpVvuYKCUktSGxKH4v9vKa2fH8nGNGjRSxAyL8C2rEbDTZLYU9irDpSphbv0vLyX',
       ),
       _JourneyStepData(
         title: 'Heirloom Export',
-        body: 'Download a printable journal or keep the trip on your devices. The route feels permanent, not disposable.',
+        body:
+            'Download a printable journal or keep the trip on your devices. The route feels permanent, not disposable.',
         image:
             'https://lh3.googleusercontent.com/aida-public/AB6AXuCriTJzsnotX5klGQPPsz_A2QTNUE-wnECnaAfcOFxBJYj4iJKEP73q6G7u_LaXEEW57asETqmQcGVE4uyLDziTXVn_7NyI3ndJNnMQbGbE36vlEgO5Tw7HXEzJI1nlbMpy2k3GeHRnEBI0C6E_wAzy5iTsqxsoKAv05n65PZ41l_n4Lk02C251yayulk-iRFDqVGPix9YrZW4kFxTXKK1QB0fmdWo8w-shbBRCpBPlXlTSRxJ7lhZQaOVog03jQ5ottDZ7rD6oXADh',
       ),
@@ -414,9 +439,17 @@ class _JourneyStepTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(data.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: NavTripPalette.terracottaDeep)),
+          Text(data.title,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(color: NavTripPalette.terracottaDeep)),
           const SizedBox(height: 8),
-          Text(data.body, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NavTripPalette.mutedInk)),
+          Text(data.body,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: NavTripPalette.mutedInk)),
           const SizedBox(height: 14),
           Transform.rotate(
             angle: reversed ? 0.03 : -0.03,
@@ -425,7 +458,11 @@ class _JourneyStepTile extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(2),
-                child: Image.network(data.image, height: 220, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                child: Image.network(data.image,
+                    height: 220,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink()),
               ),
             ),
           ),
@@ -449,11 +486,13 @@ class _JourneyStepTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
-                    border: Border.all(color: NavTripPalette.terracotta, width: 3),
+                    border:
+                        Border.all(color: NavTripPalette.terracotta, width: 3),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(width: 2, height: 300, color: NavTripPalette.terracotta),
+                Container(
+                    width: 2, height: 300, color: NavTripPalette.terracotta),
               ],
             ),
           ),
@@ -464,9 +503,11 @@ class _JourneyStepTile extends StatelessWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.only(left: reversed ? 120 : 48, right: reversed ? 48 : 120),
+      padding: EdgeInsets.only(
+          left: reversed ? 120 : 48, right: reversed ? 48 : 120),
       child: Row(
-        mainAxisAlignment: reversed ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            reversed ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!reversed) ...[
             _TimelineDot(),
@@ -509,7 +550,10 @@ class _DestinationsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Inspired Destinations', style: Theme.of(context).textTheme.displayMedium?.copyWith(color: NavTripPalette.terracottaDeep, fontSize: width < 600 ? 36 : 48)),
+        Text('Inspired Destinations',
+            style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                color: NavTripPalette.terracottaDeep,
+                fontSize: width < 600 ? 36 : 48)),
         const SizedBox(height: 20),
         GridView.count(
           physics: const NeverScrollableScrollPhysics(),
@@ -587,7 +631,9 @@ class _DestinationCardState extends State<_DestinationCard> {
               AnimatedScale(
                 duration: const Duration(milliseconds: 500),
                 scale: _hovered ? 1.08 : 1.0,
-                child: Image.network(widget.image, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                child: Image.network(widget.image,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink()),
               ),
               const DecoratedBox(
                 decoration: BoxDecoration(
@@ -604,9 +650,17 @@ class _DestinationCardState extends State<_DestinationCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(widget.country, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white70)),
+                    Text(widget.country,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(color: Colors.white70)),
                     const SizedBox(height: 6),
-                    Text(widget.title, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white)),
+                    Text(widget.title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(color: Colors.white)),
                   ],
                 ),
               ),
@@ -625,25 +679,52 @@ class _Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mobile = MediaQuery.sizeOf(context).width < 600;
+    final brand = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('NavTrip-AI',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(color: NavTripPalette.terracottaDeep)),
+        const SizedBox(height: 6),
+        Text(
+          'A travel planner shaped like a story.',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: NavTripPalette.mutedInk),
+        ),
+      ],
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 28),
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: Color(0xffdec0b7), width: 1)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('NavTrip-AI', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: NavTripPalette.terracottaDeep)),
-              const SizedBox(height: 6),
-              Text('A travel planner shaped like a story.', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: NavTripPalette.mutedInk)),
-            ],
-          ),
-          TextButton(onPressed: onExplore, child: const Text('Jump to steps')),
-        ],
-      ),
+      child: mobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                brand,
+                const SizedBox(height: 12),
+                TextButton(
+                    onPressed: onExplore, child: const Text('Jump to steps')),
+              ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(child: brand),
+                const SizedBox(width: 24),
+                TextButton(
+                    onPressed: onExplore, child: const Text('Jump to steps')),
+              ],
+            ),
     );
   }
 }
@@ -654,26 +735,69 @@ class _MobileNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
-        width: MediaQuery.sizeOf(context).width * 0.9,
+      child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        decoration: BoxDecoration(
-          color: const Color(0xff3f3f3e),
-          borderRadius: BorderRadius.circular(999),
-          boxShadow: const [
-            BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.18), blurRadius: 20, offset: Offset(0, 10)),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _NavItem(label: 'Home', icon: Icons.home, selected: true, onTap: () {}),
-            _NavItem(label: 'Explore', icon: Icons.explore, onTap: () => Navigator.of(context).pushNamed('/dashboard')),
-            _FabItem(onTap: () => Navigator.of(context).pushNamed('/dashboard')),
-            _NavItem(label: 'Trips', icon: Icons.map, onTap: () => Navigator.of(context).pushNamed('/trip-details')),
-            _NavItem(label: 'Profile', icon: Icons.person, onTap: () => Navigator.of(context).pushNamed('/login')),
-          ],
+        child: SizedBox(
+          width: MediaQuery.sizeOf(context).width * 0.9,
+          height: 92,
+          child: Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff3f3f3e),
+                    borderRadius: BorderRadius.circular(999),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.18),
+                          blurRadius: 20,
+                          offset: Offset(0, 10)),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: _NavItem(
+                              label: 'Home',
+                              icon: Icons.home,
+                              selected: true,
+                              onTap: () {})),
+                      Expanded(
+                          child: _NavItem(
+                              label: 'Explore',
+                              icon: Icons.explore,
+                              onTap: () => Navigator.of(context)
+                                  .pushNamed('/dashboard'))),
+                      const SizedBox(width: 64),
+                      Expanded(
+                          child: _NavItem(
+                              label: 'Trips',
+                              icon: Icons.map,
+                              onTap: () => Navigator.of(context)
+                                  .pushNamed('/trip-details'))),
+                      Expanded(
+                          child: _NavItem(
+                              label: 'Profile',
+                              icon: Icons.person,
+                              onTap: () =>
+                                  Navigator.of(context).pushNamed('/login'))),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                child: _FabItem(
+                    onTap: () => Navigator.of(context).pushNamed('/dashboard')),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -702,7 +826,16 @@ class _NavItem extends StatelessWidget {
         children: [
           Icon(icon, color: selected ? Colors.white : Colors.white70, size: 24),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: selected ? Colors.white : Colors.white70)),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: selected ? Colors.white : Colors.white70),
+          ),
         ],
       ),
     );
@@ -720,12 +853,14 @@ class _FabItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.only(top: -30),
         decoration: const BoxDecoration(
           color: NavTripPalette.terracotta,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.25), blurRadius: 18, offset: Offset(0, 8)),
+            BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.25),
+                blurRadius: 18,
+                offset: Offset(0, 8)),
           ],
         ),
         child: const Icon(Icons.add, color: Colors.white),
@@ -733,6 +868,3 @@ class _FabItem extends StatelessWidget {
     );
   }
 }
-
-
-

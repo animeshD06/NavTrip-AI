@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
@@ -29,9 +29,23 @@ class _AuthGuardState extends State<AuthGuard> {
       return const _AuthLoadingView();
     }
 
-    if (auth.isAuthenticated) {
+    if (auth.isAuthenticated && auth.needsVerification == false) {
       _redirectScheduled = false;
       return widget.child;
+    }
+
+    if (auth.needsVerification) {
+      if (!_redirectScheduled) {
+        _redirectScheduled = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          Navigator.of(context).pushReplacementNamed('/signup', arguments: widget.protectedRoute);
+        });
+      }
+
+      return const _AuthLoadingView();
     }
 
     if (!_redirectScheduled) {
@@ -75,3 +89,4 @@ class _AuthLoadingView extends StatelessWidget {
     );
   }
 }
+

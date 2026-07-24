@@ -39,13 +39,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
-    if (auth.isAuthenticated && !_redirectQueued) {
+    if (auth.isAuthenticated &&
+        auth.needsVerification == false &&
+        !_redirectQueued) {
       _redirectQueued = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
           return;
         }
-        Navigator.of(context).pushReplacementNamed(widget.redirectTo ?? '/dashboard');
+        Navigator.of(context)
+            .pushReplacementNamed(widget.redirectTo ?? '/dashboard');
       });
     }
 
@@ -66,14 +69,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             emailController: _emailController,
                             usernameController: _usernameController,
                             passwordController: _passwordController,
-                            confirmPasswordController: _confirmPasswordController,
+                            confirmPasswordController:
+                                _confirmPasswordController,
                             obscurePassword: _obscurePassword,
                             obscureConfirmPassword: _obscureConfirmPassword,
-                            onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
-                            onToggleConfirmPassword: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                            onTogglePassword: () => setState(
+                                () => _obscurePassword = !_obscurePassword),
+                            onToggleConfirmPassword: () => setState(() =>
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword),
                             onSubmit: _submit,
                             onGoogle: _googleSignIn,
-                            onLogin: () => Navigator.of(context).pushReplacementNamed('/login', arguments: widget.redirectTo),
+                            onLogin: () => Navigator.of(context)
+                                .pushReplacementNamed('/login',
+                                    arguments: widget.redirectTo),
                             redirectTo: widget.redirectTo,
                           ),
                         ),
@@ -91,14 +100,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             emailController: _emailController,
                             usernameController: _usernameController,
                             passwordController: _passwordController,
-                            confirmPasswordController: _confirmPasswordController,
+                            confirmPasswordController:
+                                _confirmPasswordController,
                             obscurePassword: _obscurePassword,
                             obscureConfirmPassword: _obscureConfirmPassword,
-                            onTogglePassword: () => setState(() => _obscurePassword = !_obscurePassword),
-                            onToggleConfirmPassword: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                            onTogglePassword: () => setState(
+                                () => _obscurePassword = !_obscurePassword),
+                            onToggleConfirmPassword: () => setState(() =>
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword),
                             onSubmit: _submit,
                             onGoogle: _googleSignIn,
-                            onLogin: () => Navigator.of(context).pushReplacementNamed('/login', arguments: widget.redirectTo),
+                            onLogin: () => Navigator.of(context)
+                                .pushReplacementNamed('/login',
+                                    arguments: widget.redirectTo),
                             redirectTo: widget.redirectTo,
                           ),
                         ],
@@ -133,7 +148,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     if (context.read<AuthProvider>().isAuthenticated) {
-      Navigator.of(context).pushReplacementNamed(widget.redirectTo ?? '/dashboard');
+      Navigator.of(context)
+          .pushReplacementNamed(widget.redirectTo ?? '/dashboard');
     }
   }
 
@@ -147,7 +163,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     if (context.read<AuthProvider>().isAuthenticated) {
-      Navigator.of(context).pushReplacementNamed(widget.redirectTo ?? '/dashboard');
+      Navigator.of(context)
+          .pushReplacementNamed(widget.redirectTo ?? '/dashboard');
     }
   }
 }
@@ -165,43 +182,61 @@ class _StoryPanel extends StatelessWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                decoration: NavTripStyles.polaroidCard(),
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(2),
-                      child: Image.network(
-                        'https://lh3.googleusercontent.com/aida-public/AB6AXuBF0XU3AL3w_e-ZuAMqI7naht3rDkZdQvuvPqu6bd9XrMhmQSQIMVZ8mg4mCcmtdJEbLljiiQr-ggnLSSnHGtKNqATWqyZ6mAZgn16MjURSw-9cwJmIcZ_lGdokYD5p6RlrxowTfj38oWvCpN7bMvOxgqTsVgoq17ZuoL0YQeQ2q88ntdXlwKYtsG2fPn8Q_8Oar3UVjsgG_s06EcKM3TbmEtH1mJBVehqXcpvhKvec4xjCtw0FsGYKc1egfIr-5brhv1fJN4PDxd5r',
-                        height: large ? 460 : 240,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableHeight = constraints.maxHeight;
+              final imageHeight = large && availableHeight.isFinite
+                  ? (availableHeight * 0.54).clamp(300.0, 460.0).toDouble()
+                  : (large ? 460.0 : 240.0);
+
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Container(
+                      decoration: NavTripStyles.polaroidCard(),
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: Image.network(
+                                'https://lh3.googleusercontent.com/aida-public/AB6AXuBF0XU3AL3w_e-ZuAMqI7naht3rDkZdQvuvPqu6bd9XrMhmQSQIMVZ8mg4mCcmtdJEbLljiiQr-ggnLSSnHGtKNqATWqyZ6mAZgn16MjURSw-9cwJmIcZ_lGdokYD5p6RlrxowTfj38oWvCpN7bMvOxgqTsVgoq17ZuoL0YQeQ2q88ntdXlwKYtsG2fPn8Q_8Oar3UVjsgG_s06EcKM3TbmEtH1mJBVehqXcpvhKvec4xjCtw0FsGYKc1egfIr-5brhv1fJN4PDxd5r',
+                                height: imageHeight,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'Capture the journey.',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: NavTripPalette.mutedInk,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Capture the journey.',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: NavTripPalette.mutedInk,
-                            fontStyle: FontStyle.italic,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Icon(Icons.travel_explore, color: NavTripPalette.terracotta, size: 34),
-              const SizedBox(height: 8),
-              Text(
-                'Make planning feel like keeping a travel journal.',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Icon(Icons.travel_explore,
+                      color: NavTripPalette.terracotta, size: 34),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Make planning feel like keeping a travel journal.',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -269,7 +304,7 @@ class _SignUpPanel extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Set up your traveler profile and keep planning under Clerk.',
+                'Set up your traveler profile and keep planning under Firebase.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: NavTripPalette.mutedInk,
                     ),
@@ -280,7 +315,8 @@ class _SignUpPanel extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
               if (auth.verificationMessage != null) ...[
-                _MessageBanner(message: auth.verificationMessage!, isError: false),
+                _MessageBanner(
+                    message: auth.verificationMessage!, isError: false),
                 const SizedBox(height: 12),
               ],
               Container(
@@ -310,7 +346,9 @@ class _SignUpPanel extends StatelessWidget {
                       controller: usernameController,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(labelText: 'Username'),
-                      validator: (value) => (value?.trim().isEmpty ?? true) ? 'Enter a username.' : null,
+                      validator: (value) => (value?.trim().isEmpty ?? true)
+                          ? 'Enter a username.'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -321,7 +359,9 @@ class _SignUpPanel extends StatelessWidget {
                         labelText: 'Password',
                         suffixIcon: IconButton(
                           onPressed: onTogglePassword,
-                          icon: Icon(obscurePassword ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                         ),
                       ),
                       validator: (value) {
@@ -343,7 +383,9 @@ class _SignUpPanel extends StatelessWidget {
                         labelText: 'Confirm password',
                         suffixIcon: IconButton(
                           onPressed: onToggleConfirmPassword,
-                          icon: Icon(obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(obscureConfirmPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                         ),
                       ),
                       validator: (value) {
@@ -365,7 +407,7 @@ class _SignUpPanel extends StatelessWidget {
                               height: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Sign Up'),
+                          : const Text('Create Account'),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
@@ -375,9 +417,12 @@ class _SignUpPanel extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'If Clerk requires email verification, you will be prompted to verify before the app opens your dashboard.',
+                      'If Firebase requires email verification, you will be prompted to verify before the app opens your dashboard.',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: NavTripPalette.mutedInk),
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: NavTripPalette.mutedInk),
                     ),
                   ],
                 ),
@@ -392,7 +437,10 @@ class _SignUpPanel extends StatelessWidget {
                 Text(
                   'You will return to $redirectTo after authentication.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: NavTripPalette.mutedInk),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: NavTripPalette.mutedInk),
                 ),
               ],
             ],
@@ -418,7 +466,8 @@ class _MessageBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isError ? const Color(0xffffe5e1) : const Color(0xfffff6d8),
-        border: Border.all(color: isError ? NavTripPalette.error : const Color(0xffc8b26b)),
+        border: Border.all(
+            color: isError ? NavTripPalette.error : const Color(0xffc8b26b)),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -430,4 +479,3 @@ class _MessageBanner extends StatelessWidget {
     );
   }
 }
-

@@ -10,17 +10,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  app_links: ^7.2.0
-  clerk_auth: ^0.0.16-beta
-  clerk_flutter: ^0.0.16-beta
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
-  flutter_map: ^7.0.2
+  firebase_auth: ^5.6.2
+  firebase_core: ^3.8.0
   flutter_dotenv: ^6.0.1
+  flutter_map: ^7.0.2
+  flutter_tts: ^4.2.5
   geolocator: ^13.0.2
+  google_sign_in: ^6.2.1
   latlong2: ^0.9.1
   provider: ^6.1.2
-  flutter_tts: ^4.2.5
   url_launcher: ^6.3.1
 
 dev_dependencies:
@@ -32,4 +32,3 @@ flutter:
   uses-material-design: true
   assets:
     - .env
-

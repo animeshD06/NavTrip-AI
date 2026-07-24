@@ -1,14 +1,20 @@
-import 'package:clerk_auth/clerk_auth.dart';
-import 'package:clerk_flutter/clerk_flutter.dart';
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart';
 
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
+  AuthProvider() {
+    _authStateSubscription = _authService.authStateChanges.listen(_handleAuthStateChanged);
+    _handleAuthStateChanged(_authService.currentUser);
+  }
 
-  ClerkAuthState? _authState;
+  final AuthService _authService = AuthService();
+  StreamSubscription<firebase_auth.User?>? _authStateSubscription;
+
   AppUser? _currentUser;
   bool _isBusy = false;
   bool _isReady = false;
@@ -17,29 +23,11 @@ class AuthProvider extends ChangeNotifier {
 
   AppUser? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
-  bool get isBusy => _isBusy || (_authState?.isSigningIn ?? false) || (_authState?.isSigningUp ?? false);
+  bool get isBusy => _isBusy;
   bool get isReady => _isReady;
   String? get errorMessage => _errorMessage;
   String? get verificationMessage => _verificationMessage;
-
-  void attach(ClerkAuthState authState) {
-    if (identical(_authState, authState)) {
-      _syncFromAuth();
-      return;
-    }
-
-    _authState?.removeListener(_syncFromAuth);
-    _authState = authState;
-    _authService.attach(authState);
-    _authState?.addListener(_syncFromAuth);
-    _syncFromAuth();
-  }
-
-  Future<void> restoreSession() async {
-    _syncFromAuth();
-    await _authService.restoreSession();
-    _syncFromAuth();
-  }
+  bool get needsVerification => _currentUser != null && _currentUser!.emailVerified == false;
 
   Future<void> signIn({
     required String identifier,
@@ -74,17 +62,28 @@ class AuthProvider extends ChangeNotifier {
     return _runAction(() => _authService.handleDeepLink(uri));
   }
 
+  Future<void> restoreSession() async {
+    _syncFromUser(_authService.currentUser);
+    await _authService.restoreSession();
+    _syncFromUser(_authService.currentUser);
+  }
+
   void clearMessages() {
     _errorMessage = null;
     _verificationMessage = null;
     notifyListeners();
   }
 
-  void _syncFromAuth() {
-    final authState = _authState;
-    _isReady = authState != null && !authState.isNotAvailable;
-    _currentUser = _authService.getCurrentUser();
-    _verificationMessage = _needsVerification ? 'Check your email to finish verifying your account.' : null;
+  void _handleAuthStateChanged(firebase_auth.User? user) {
+    _syncFromUser(user);
+  }
+
+  void _syncFromUser(firebase_auth.User? user) {
+    _isReady = true;
+    _currentUser = user == null ? null : AppUser.fromFirebase(user);
+    _verificationMessage = user != null && user.emailVerified == false
+        ? 'Check your email to verify your account.'
+        : null;
 
     if (_currentUser != null) {
       _errorMessage = null;
@@ -93,10 +92,6 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool get _needsVerification =>
-      _authState?.signUp?.verifications.values.any((v) => v.status.isVerified == false) == true &&
-      _currentUser == null;
-
   Future<void> _runAction(Future<void> Function() action) async {
     _isBusy = true;
     _errorMessage = null;
@@ -104,7 +99,10 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       await action();
-      _syncFromAuth();
+      _syncFromUser(_authService.currentUser);
+    } on firebase_auth.FirebaseAuthException catch (error) {
+      _errorMessage = _friendlyMessage(error);
+      notifyListeners();
     } catch (error) {
       _errorMessage = _friendlyMessage(error);
       notifyListeners();
@@ -115,38 +113,32 @@ class AuthProvider extends ChangeNotifier {
   }
 
   String _friendlyMessage(Object error) {
-    if (error is ClerkError) {
-      final message = error.message.trim();
-      final lower = message.toLowerCase();
+    if (error is firebase_auth.FirebaseAuthException) {
+      final code = error.code.toLowerCase();
+      final message = (error.message ?? '').trim();
 
-      if (lower.contains('password') && (lower.contains('incorrect') || lower.contains('invalid'))) {
-        return 'That password is not correct.';
-      }
-
-      if ((lower.contains('email') || lower.contains('identifier') || lower.contains('username')) &&
-          lower.contains('already')) {
-        if (lower.contains('username')) {
-          return 'That username is already in use.';
-        }
-        if (lower.contains('email')) {
+      switch (code) {
+        case 'email-already-in-use':
           return 'That email is already in use.';
-        }
-        return 'That account already exists.';
+        case 'invalid-email':
+          return 'Enter a valid email address.';
+        case 'weak-password':
+          return 'Use a stronger password.';
+        case 'user-not-found':
+          return 'We could not find an account for that email.';
+        case 'wrong-password':
+        case 'invalid-credential':
+          return 'That email or password is not correct.';
+        case 'network-request-failed':
+          return 'A network error interrupted authentication. Try again.';
+        case 'popup-closed-by-user':
+        case 'cancelled-popup-request':
+          return 'Google sign-in was cancelled.';
+        case 'account-exists-with-different-credential':
+          return 'That account already exists with a different sign-in method.';
+        default:
+          return message.isNotEmpty ? message : 'Authentication failed. Please try again.';
       }
-
-      if (lower.contains('not found') || lower.contains('could not find') || lower.contains('unknown')) {
-        return 'We could not find an account for that login.';
-      }
-
-      if (lower.contains('oauth') || lower.contains('google') || lower.contains('social')) {
-        return 'Google sign-in could not be completed.';
-      }
-
-      if (lower.contains('network') || lower.contains('socket') || lower.contains('timeout')) {
-        return 'A network error interrupted authentication. Try again.';
-      }
-
-      return message;
     }
 
     final message = error.toString();
@@ -161,8 +153,7 @@ class AuthProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _authState?.removeListener(_syncFromAuth);
+    _authStateSubscription?.cancel();
     super.dispose();
   }
 }
-

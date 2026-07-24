@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class NavTripPalette {
   static const surface = Color(0xfff9f9f8);
@@ -286,9 +286,9 @@ class PaperTexture extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.white.withOpacity(0.16),
+                      Colors.white.withValues(alpha: 0.16),
                       Colors.transparent,
-                      Colors.white.withOpacity(0.08),
+                      Colors.white.withValues(alpha: 0.08),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -333,6 +333,7 @@ class PaperTexture extends StatelessWidget {
     );
   }
 }
+
 
 
 

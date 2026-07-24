@@ -1,77 +1,89 @@
-import 'package:clerk_auth/clerk_auth.dart';
-import 'package:clerk_flutter/clerk_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:google_sign_in/google_sign_in.dart';
 
-import '../config/auth_config.dart' as app_auth;
-import '../models/app_user.dart';
 
 class AuthService {
-  ClerkAuthState? _authState;
+  AuthService();
 
-  void attach(ClerkAuthState authState) {
-    _authState = authState;
-  }
+  final firebase_auth.FirebaseAuth _auth = firebase_auth.FirebaseAuth.instance;
 
-  ClerkAuthState get _state {
-    final authState = _authState;
-    if (authState == null) {
-      throw StateError('AuthService has not been attached to ClerkAuthState yet.');
-    }
-    return authState;
-  }
+  firebase_auth.User? get currentUser => _auth.currentUser;
 
-  AppUser? getCurrentUser() {
-    final user = _authState?.user;
-    if (user == null) {
-      return null;
-    }
+  Stream<firebase_auth.User?> get authStateChanges => _auth.authStateChanges();
 
-    return AppUser.fromClerk(user);
-  }
-
-  Future<void> signUp({
+  Future<firebase_auth.UserCredential> signUp({
     required String email,
     required String username,
     required String password,
     required String confirmPassword,
-  }) {
-    return _state.attemptSignUp(
-      strategy: Strategy.password,
-      emailAddress: email.trim(),
-      username: username.trim(),
+  }) async {
+    if (password != confirmPassword) {
+      throw firebase_auth.FirebaseAuthException(
+        code: 'password-mismatch',
+        message: 'Password and confirmation must match.',
+      );
+    }
+
+    final credential = await _auth.createUserWithEmailAndPassword(
+      email: email.trim(),
       password: password,
-      passwordConfirmation: confirmPassword,
-      redirectUrl: app_auth.AuthConfig.emailVerificationRedirectUri.toString(),
     );
+
+    final user = credential.user;
+    if (user != null) {
+      final displayName = username.trim();
+      if (displayName.isNotEmpty) {
+        await user.updateDisplayName(displayName);
+      }
+      await user.sendEmailVerification();
+      await user.reload();
+    }
+
+    return credential;
   }
 
-  Future<void> signIn({
+  Future<firebase_auth.UserCredential> signIn({
     required String identifier,
     required String password,
-  }) {
-    return _state.attemptSignIn(
-      strategy: Strategy.password,
-      identifier: identifier.trim(),
+  }) async {
+    return _auth.signInWithEmailAndPassword(
+      email: identifier.trim(),
       password: password,
     );
   }
 
-  Future<void> signInWithGoogle() {
-    return _state.oauthSignIn(
-      strategy: Strategy.oauthGoogle,
-      redirect: app_auth.AuthConfig.oauthRedirectUri,
+  Future<firebase_auth.UserCredential> signInWithGoogle() async {
+    final googleSignIn = GoogleSignIn(scopes: <String>['email', 'profile']);
+    final googleUser = await googleSignIn.signIn();
+    if (googleUser == null) {
+      throw firebase_auth.FirebaseAuthException(
+        code: 'popup-closed-by-user',
+        message: 'Google sign-in was cancelled.',
+      );
+    }
+
+    final googleAuth = await googleUser.authentication;
+    final credential = firebase_auth.GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
     );
+
+    return _auth.signInWithCredential(credential);
   }
 
-  Future<void> signOut() {
-    return _state.signOut();
+  Future<void> signOut() async {
+    await Future.wait([
+      _auth.signOut(),
+      GoogleSignIn().signOut(),
+    ]);
   }
 
   Future<void> handleDeepLink(Uri uri) async {
-    await _state.parseDeepLink(uri);
+    // Firebase auth does not require custom deep-link parsing for this app.
   }
 
   Future<void> restoreSession() async {
-    getCurrentUser();
+    await currentUser?.reload();
   }
 }
 
