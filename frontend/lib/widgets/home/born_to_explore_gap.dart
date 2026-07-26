@@ -9,7 +9,7 @@ class BornToExploreGap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final fontSize = width < 600 ? 32.0 : 48.0;
+    final fontSize = width < 600 ? 24.0 : 36.0;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 96.0),
@@ -17,7 +17,7 @@ class BornToExploreGap extends StatelessWidget {
       child: Wrap(
         alignment: WrapAlignment.center,
         crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 24,
+        spacing: 20,
         runSpacing: 16,
         children: [
           Text(
@@ -47,7 +47,20 @@ class BornToExploreGap extends StatelessWidget {
 }
 
 class AnimatedDotCircle extends StatefulWidget {
-  const AnimatedDotCircle({super.key});
+  const AnimatedDotCircle({
+    this.dotColor = NavTripPalette.terracottaDeep,
+    this.size = 72,
+    this.radius = 24,
+    this.dotWidth = 50,
+    this.dotHeight = 10,
+    super.key,
+  });
+
+  final Color dotColor;
+  final double size;
+  final double radius;
+  final double dotWidth;
+  final double dotHeight;
 
   @override
   State<AnimatedDotCircle> createState() => _AnimatedDotCircleState();
@@ -80,24 +93,28 @@ class _AnimatedDotCircleState extends State<AnimatedDotCircle>
         return Transform.rotate(
           angle: _controller.value * 2.0 * math.pi,
           child: SizedBox(
-            width: 72,
-            height: 72,
+            width: widget.size,
+            height: widget.size,
             child: Stack(
               alignment: Alignment.center,
               children: List.generate(8, (index) {
                 final angle = (index * 2.0 * math.pi) / 8.0;
-                final radius = 24.0;
-                final x = 36.0 + radius * math.cos(angle) - 5.0;
-                final y = 36.0 + radius * math.sin(angle) - 5.0;
+                final center = widget.size / 2;
+                final x = center +
+                    widget.radius * math.cos(angle) -
+                    widget.dotWidth / 2;
+                final y = center +
+                    widget.radius * math.sin(angle) -
+                    widget.dotHeight / 2;
                 return Positioned(
                   left: x,
                   top: y,
                   child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: const BoxDecoration(
-                      color: NavTripPalette.terracottaDeep,
-                      shape: BoxShape.circle,
+                    width: widget.dotWidth,
+                    height: widget.dotHeight,
+                    decoration: BoxDecoration(
+                      color: widget.dotColor,
+                      borderRadius: BorderRadius.circular(widget.dotWidth),
                     ),
                   ),
                 );

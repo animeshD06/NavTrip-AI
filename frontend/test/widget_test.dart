@@ -37,9 +37,9 @@ void main() {
 
     expect(find.text('NavTrip-AI'), findsWidgets);
     expect(find.text('Start Planning'), findsAtLeastNWidgets(1));
-    expect(find.text('How it works'), findsOneWidget);
-    expect(find.text('AI TRIP PLANNING'), findsOneWidget);
-    expect(find.text('BUDGET OPTIMIZATION'), findsOneWidget);
+    expect(find.text('See Flow'), findsOneWidget);
+    expect(find.text('What is NavTrip?'), findsOneWidget);
+    expect(find.text('Our Solution'), findsOneWidget);
     expect(find.text('Enter Destination'), findsOneWidget);
     expect(find.text('Ready to Travel'), findsOneWidget);
     expect(tester.takeException(), isNull);

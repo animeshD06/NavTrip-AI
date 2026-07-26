@@ -136,7 +136,6 @@ class _TravelStackScrollerState extends State<TravelStackScroller> {
           final containerTopPosition = isSticking ? clampedScrollOffset : 0.0;
           
           final currentPosition = (clampedScrollOffset / itemDistance).clamp(0.0, widget.cards.length - 1.0);
-          final activeIndex = currentPosition.floor().clamp(0, widget.cards.length - 1);
 
           final cardHeight = math.min(680.0, math.max(560.0, viewportHeight * 0.82));
 

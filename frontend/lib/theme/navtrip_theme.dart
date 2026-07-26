@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class NavTripPalette {
   static const surface = Color(0xfff9f9f8);
@@ -18,6 +18,13 @@ class NavTripPalette {
   static const note = Color(0xfffef9c3);
   static const error = Color(0xffba1a1a);
   static const success = Color(0xff0f766e);
+}
+
+class NavTripEditorial {
+  static const ink = Color(0xff303036);
+  static const navy = Color(0xff001a3d);
+  static const blue = Color(0xff356de9);
+  static const panel = Color(0xfff1f2f8);
 }
 
 class NavTripStyles {
@@ -177,10 +184,12 @@ class NavTripStyles {
         filled: false,
         isDense: true,
         border: UnderlineInputBorder(
-          borderSide: BorderSide(color: NavTripPalette.outlineVariant, width: 1.4),
+          borderSide:
+              BorderSide(color: NavTripPalette.outlineVariant, width: 1.4),
         ),
         enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: NavTripPalette.outlineVariant, width: 1.4),
+          borderSide:
+              BorderSide(color: NavTripPalette.outlineVariant, width: 1.4),
         ),
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: NavTripPalette.terracotta, width: 1.8),
@@ -302,7 +311,9 @@ class PaperTexture extends StatelessWidget {
       ],
     );
   }
-}class SectionHeading extends StatelessWidget {
+}
+
+class SectionHeading extends StatelessWidget {
   const SectionHeading({
     required this.title,
     this.subtitle,
@@ -333,7 +344,3 @@ class PaperTexture extends StatelessWidget {
     );
   }
 }
-
-
-
-

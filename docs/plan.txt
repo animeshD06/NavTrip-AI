@@ -1,0 +1,26 @@
+Antigravity plan: editorial hero scroll fix
+
+Goal
+- Prevent the intro hero words from overlapping the central dot mark while scrolling.
+- Match the reference motion: "Born" moves left and "to Travel." moves right as the user scrolls down.
+
+Implementation
+- Update `frontend/lib/widgets/home/editorial_scroll_story.dart`.
+- Replace the free-positioned hero text stack with a constraint-aware row.
+- Reserve three lanes in the hero: left word, center animated dot ring, right phrase.
+- Wrap each word in `_HeroWordSlot`, using `FittedBox(scaleDown)` so long text fits its lane on narrow widths.
+- Increase scroll translation distance from 36px to 72px in opposite directions:
+  - `Born`: negative X offset.
+  - `to Travel.`: positive X offset.
+- Reduce mobile hero type and dot-ring size slightly to avoid collisions on compact screens.
+
+Verification
+- Run `..\tools\flutter\bin\dart.bat format lib\widgets\home\editorial_scroll_story.dart`.
+- Run `..\tools\flutter\bin\flutter.bat test`.
+- Run `..\tools\flutter\bin\flutter.bat analyze`.
+- Preview at `http://127.0.0.1:4174` if the Flutter web server is running.
+
+Known unrelated analyzer warnings
+- `lib/main.dart` has `flutter_web_plugins` dependency lint.
+- `lib/screens/dashboard_screen.dart` has unused private widgets.
+- `lib/widgets/home/travel_stack_scroller.dart` has an unused local and deprecated `withOpacity` calls.
