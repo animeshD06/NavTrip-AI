@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navtrip_ai/models/app_user.dart';
+import 'package:navtrip_ai/models/tourist_place.dart';
 import 'package:navtrip_ai/providers/auth_provider.dart';
+import 'package:navtrip_ai/providers/trip_planner_controller.dart';
+import 'package:navtrip_ai/screens/dashboard_screen.dart';
 import 'package:navtrip_ai/screens/home_screen.dart';
+import 'package:navtrip_ai/services/api_client.dart';
 import 'package:navtrip_ai/theme/navtrip_theme.dart';
 import 'package:navtrip_ai/widgets/auth_guard.dart';
 import 'package:provider/provider.dart';
@@ -32,8 +36,12 @@ void main() {
     );
 
     expect(find.text('NavTrip-AI'), findsWidgets);
-    expect(find.text('Start Planning'), findsOneWidget);
+    expect(find.text('Start Planning'), findsAtLeastNWidgets(1));
     expect(find.text('How it works'), findsOneWidget);
+    expect(find.text('AI TRIP PLANNING'), findsOneWidget);
+    expect(find.text('BUDGET OPTIMIZATION'), findsOneWidget);
+    expect(find.text('Enter Destination'), findsOneWidget);
+    expect(find.text('Ready to Travel'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -57,6 +65,21 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('dashboard stack boots with quotes and actions', (tester) async {
+    _setDesktopView(tester);
+
+    await tester.pumpWidget(_dashboardApp(
+      auth: FakeAuthProvider.authenticated(),
+    ));
+    await tester.pump();
+
+    expect(find.textContaining('Welcome Back'), findsOneWidget);
+    expect(find.text('TODAY\'S SPOTLIGHT'), findsOneWidget);
+    expect(find.text('View Itinerary'), findsAtLeastNWidgets(1));
+    expect(find.textContaining('Not all those who wander are lost'),
+        findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('Sign In page opens', (tester) async {
     _setDesktopView(tester);
 
@@ -149,6 +172,47 @@ Widget _routedAuthApp({
       },
     ),
   );
+}
+
+Widget _dashboardApp({required AuthProvider auth}) {
+  return MultiProvider(
+    providers: [
+      ChangeNotifierProvider<AuthProvider>.value(value: auth),
+      Provider<ApiClient>(create: (_) => FakeApiClient()),
+      ChangeNotifierProxyProvider<ApiClient, TripPlannerController>(
+        create: (context) => TripPlannerController(context.read<ApiClient>()),
+        update: (_, apiClient, controller) {
+          return controller ?? TripPlannerController(apiClient);
+        },
+      ),
+    ],
+    child: MaterialApp(
+      theme: NavTripStyles.theme(),
+      routes: {
+        '/dashboard': (_) => const DashboardScreen(),
+        '/trip-details': (_) => const Scaffold(body: Text('Trip details')),
+        '/trip-map': (_) => const Scaffold(body: Text('Trip map')),
+        '/login': (_) => const Scaffold(body: Text('Sign in')),
+      },
+      initialRoute: '/dashboard',
+    ),
+  );
+}
+
+class FakeApiClient extends ApiClient {
+  @override
+  Future<Map<String, dynamic>> fetchHealth() async {
+    return {'status': 'ok'};
+  }
+
+  @override
+  Future<List<TouristPlace>> fetchPlaces({
+    String? city,
+    String? category,
+    String? search,
+  }) async {
+    return const [];
+  }
 }
 
 class FakeAuthProvider extends ChangeNotifier implements AuthProvider {

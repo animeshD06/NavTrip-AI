@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/navtrip_theme.dart';
+import '../widgets/home/sticky_trip_planner.dart';
+import '../widgets/home/travel_stack_scroller.dart';
+import '../widgets/home/born_to_explore_gap.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -18,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final _scrollController = ScrollController();
   final _stepsKey = GlobalKey();
   final _destinationsKey = GlobalKey();
-  bool _stickyHover = false;
 
   @override
   void dispose() {
@@ -53,28 +55,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: width < 600 ? 20 : 64,
-                      vertical: width < 600 ? 28 : 56,
+                      vertical: width < 600 ? 28 : 44,
                     ),
-                    child: _HeroSection(
-                      stickyHover: _stickyHover,
-                      onStickyHoverChanged: (value) {
-                        if (mounted) {
-                          setState(() => _stickyHover = value);
-                        }
-                      },
-                      onPrimaryAction: () =>
-                          Navigator.of(context).pushNamed('/dashboard'),
-                      onSecondaryAction: () => _scrollToKey(_stepsKey),
+                    child: TravelStackScroller(
+                      scrollController: _scrollController,
+                      cards: _homeStackCards(),
                     ),
                   ),
-                  Container(
+                  const BornToExploreGap(),
+                  KeyedSubtree(
                     key: _stepsKey,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: width < 600 ? 20 : 64,
-                      vertical: 48,
+                    child: StickyTripPlanner(
+                      scrollController: _scrollController,
+                      steps: _plannerSteps(),
                     ),
-                    color: NavTripPalette.surfaceContainerLow,
-                    child: const _JourneyStepsSection(),
                   ),
                   Container(
                     key: _destinationsKey,
@@ -105,6 +99,124 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  List<TravelStackCardData> _homeStackCards() {
+    return [
+      TravelStackCardData(
+        badge: 'WELCOME',
+        title: 'Plan your next adventure with precision.',
+        subtitle:
+            'A tactile travel planner that feels like a cherished journal. Build routes, keep notes, and move from inspiration to itinerary with a few deliberate gestures.',
+        quote: 'The best trips begin as a feeling, then become a route.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuBhweeDqK7cfx6FGBKWhcAYPW9AkaPzgKU0rQc_AcZS4rODLP2sB9WdkWkj1yH-Y9xAAV4EXiyUDR99MubUQuqcJDOzAkH1_HmTnWg8QPEvnvVgeLjJrspwddE39R8j0n-21X1CSGuX2FWmd-TIJonqH1JVLb8hJWIRZg3cXfTbVtmWkD4vWcJG8kwTssPhkq8GvR5pxDLU6Z56Ot0N0zeMzWSOVtqCw2S0B-Fb5Sj7Saqccj3gtLTsVWASDa7_LTSWXH7SI8eMHyW7',
+        primaryLabel: 'Start Planning',
+        onPrimary: () => Navigator.of(context).pushNamed('/dashboard'),
+        secondaryLabel: 'How it works',
+        onSecondary: () => _scrollToKey(_stepsKey),
+      ),
+      TravelStackCardData(
+        badge: 'AI TRIP PLANNING',
+        title: 'Turn a destination into a day-by-day plan.',
+        subtitle:
+            'Tell NavTrip what kind of journey you want and let the planner shape the sequence, timing, and route logic.',
+        quote: 'A clear itinerary leaves more room for wonder.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuDpSdAuxc6dy7lfNXuZ7twkJAlNHf9SQ0PYgmRamCAMvs5bTLczWOX-dnSBDCo6CIe7JQWYvHvtkc2w7lGCba26MyaPLUglsT4AHGRvR5R522qLI4kLwDy542D5CwxrvSZh3ySYE-h95vYT7fnIGDtJ6lddL_p0MbecpYMan-5ZrpEUwRn6Zt21GtU-lEZ6iCI4DaP48WbyGKbPnI-9uuvxynVTeSORc_IhMPvAoxSqlNu1bWmA78soPR-6BzcAduDb7uoBV3YgKsgS',
+      ),
+      TravelStackCardData(
+        badge: 'SMART RECOMMENDATIONS',
+        title: 'Find the stops that match your mood.',
+        subtitle:
+            'Surface hidden gems, iconic sights, quieter hours, and practical route notes without flattening the personality of the trip.',
+        quote:
+            'A recommendation should feel like a local whisper, not a billboard.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuBBj229moOMV-6SYMCNj19csS_yeumcFOAJ7PP6qcjtNgD4fc7EqpHKbCOoz193F2gnjrI5YOsbqsEXxjFpIrrXLpUt34vove7iJToc2pmbjquwKGGw_e1hSselOGnLJSefeWtEoc3TJjXoLajUtEcNgZMUl8Gyc8qSdpR_qGpboxE8g1fAHK-sH-GTroVJjE6GAxnZu_RdIqFih20EEFq3YLtlNtU4RZeZrzygD2wjLwB9Cl9eXSs6miSObNAnFuhjT6fs9tyiFVvh',
+      ),
+      TravelStackCardData(
+        badge: 'BUDGET OPTIMIZATION',
+        title: 'Balance memorable days with realistic spend.',
+        subtitle:
+            'Keep hotels, food, travel time, and local experiences in view while the plan stays flexible enough to adjust.',
+        quote: 'A good budget is not a limit. It is a compass.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuB6X-nbkrD2RuSThyypMSJ4dPWmB8NvsIlabOYZCea3JqcRawYtxt6qReBvly4mX6dddRBWAxZBF7OdS0oQ2-AAwZb0PtjK0vrTw9omWqoKElBsoBmjqNiXBdDv1_nahfFPp-aydiYMQ62R5d1dapegzrtoVZwdAFYLkoI8Ve1t9_uQ0EcwO7g53WQArUSNWylmcvS34ZdISCzZydb2aFbk36j_2F0G9uLyFK_4jtDdUFMi4L6SvSTx_dNqCMErGsQRW8Tsq47iMQfA',
+      ),
+      TravelStackCardData(
+        badge: 'START PLANNING',
+        title: 'Ready when your next idea appears.',
+        subtitle:
+            'Move from inspiration to an editable itinerary with maps, notes, timing, and trip context already organized.',
+        quote: 'Pack light, plan clearly, leave space for surprise.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuBAEXGXMZdRt9Qlfp1YXjUFUchOD7q0aHNBBCnRvcAuYkdoUCzeWjgKfpUH7_WtpKIWq8dvG1VM5W_O52FR9Q0g_nolife3sRwuNnYoQRQiWYbk44GMKwEFh7U5ffGv5BnnFAYd231PWxXpGqFkFpGzNFjwMETzYQY6ShT1bWqgxy6scPIwpMCC4cFQO_jCS1pM9Dg-odeFFuyLcfPcgI6Gn_q6_Ba9kXVl6jYoM4tdLLLQRsQqRhfEPOZANbTG5QVgKI1R7IRuu8JI',
+        primaryLabel: 'Start Planning',
+        onPrimary: () => Navigator.of(context).pushNamed('/dashboard'),
+      ),
+    ];
+  }
+
+  List<PlannerStepData> _plannerSteps() {
+    return [
+      PlannerStepData(
+        title: 'Enter Destination',
+        heading: 'Start with the place calling your name.',
+        description:
+            'Choose a city or region and NavTrip begins shaping the trip around local rhythm, travel time, and nearby highlights.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuDRpFXG1Fa46N8fnNfSf8ICeYzNmolpXUgu4jXbP8ztVfuOIQlYaWQ6iNV-lL-GvKCz-1VceN1uB2eh1ZNZxDVL8RaP-P4-DtGfljwxFr_52MfP2aQuvwH3GXVTXStYhFHl3cgAAofRo_Pw_t7a0st6zMyVmBdIAxKaj0rrmHQxTutpbbH4Lem9BsX5FQqtUYt-QpyFJz0KicXnnpVvuYKCUktSGxKH4v9vKa2fH8nGNGjRSxAyL8C2rEbDTZLYU9irDpSphbv0vLyX',
+        icon: Icons.place_outlined,
+      ),
+      PlannerStepData(
+        title: 'Select Dates',
+        heading: 'Set the pace before the route takes shape.',
+        description:
+            'Pick trip length and give the planner enough structure to balance full days, slow mornings, and realistic travel windows.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuCriTJzsnotX5klGQPPsz_A2QTNUE-wnECnaAfcOFxBJYj4iJKEP73q6G7u_LaXEEW57asETqmQcGVE4uyLDziTXVn_7NyI3ndJNnMQbGbE36vlEgO5Tw7HXEzJI1nlbMpy2k3GeHRnEBI0C6E_wAzy5iTsqxsoKAv05n65PZ41l_n4Lk02C251yayulk-iRFDqVGPix9YrZW4kFxTXKK1QB0fmdWo8w-shbBRCpBPlXlTSRxJ7lhZQaOVog03jQ5ottDZ7rD6oXADh',
+        icon: Icons.calendar_month_outlined,
+      ),
+      PlannerStepData(
+        title: 'Choose Preferences',
+        heading: 'Tell the planner what kind of traveler you are.',
+        description:
+            'Blend culture, nature, food, history, pace, and budget so recommendations feel personal instead of generic.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuCjHVtVcf5pUDBcddizpfb9nfeINpnEgWtrq-HMvA2aD9ilQLk2IsmkcNVpoR08XvpsdVQ93Zl5SEY9fqqK8VToD0RZEBQu97rr12Efx8ZdeWll2Vq24cjhYhBJDSDi_9pZf-mpsPv22b-kppUQxidiU5nagOOC6v9lpSQMTa4qO0hjEKR929OAY4m4sn-IstAgDZsEZNlA8E2lE5w_5Ca53MUkcXnfWSnQG-P6s1C1B-LJkpGCp5W88q52MSVtroABrxBuVBSNr1Ie',
+        icon: Icons.tune,
+      ),
+      PlannerStepData(
+        title: 'AI Creates Itinerary',
+        heading: 'Watch the rough idea become a real plan.',
+        description:
+            'NavTrip orders stops, groups nearby places, estimates visits, and keeps the route readable from breakfast to evening.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuDqSr-jDZ3s6sJ4MHVblLt9e-M5iEWpK60asKVE_30veuVDeQXEIT3nErCK9WawEgngsA5OrM20FTWtwaDk8xx4gVQb_XnB7HB05-_JRuPaNkZpO-t4WtFNdg5Z5_zmJe7B4A3ifbPN_yRgUEVOJdZtc_mDW1aJ-M5F5SgVuBrQ7n6NpdtnQnkuHEmZxBTmmNTlGwwA1hsMlh7c48gIJjKt1F6GUNqjKMhW6_SR3vr9-rzm1P0TqzG10OxZLr_g7-mVRSPtcy-ecQWH',
+        icon: Icons.auto_awesome,
+      ),
+      PlannerStepData(
+        title: 'Customize Plan',
+        heading: 'Refine the route until it sounds like you.',
+        description:
+            'Swap stops, keep notes, add hidden gems, and use map context to turn the generated draft into your own journey.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuDcaoykP8GYJS_PcuSy8Z5MsdQsfRP5yoxYavgicUHxgiD9cY-kKxCGaeJ80z8PcKWBkPt6fK-g6LRz4Xd_j00E3JzmVbHqdrgAMch51pDNPPP2u3nv0YOJXPIiGGKQv46huMOLX4Pd9Bz7PUm4sm92jVpgxpOB8KK3yJKmzkvQsKChf-ZWkQtN7iW48uYkhqcQRFoMVrWTl2jq-c9vaPAep-tUYAGNmGeLHep1xowOWr92tBZMxvrRhUnOPsWTOkTzNsZwBU9TRK0i',
+        icon: Icons.edit_note,
+      ),
+      PlannerStepData(
+        title: 'Ready to Travel',
+        heading: 'Carry the finished plan into the world.',
+        description:
+            'Open maps, review daily timing, keep offline notes close, and travel with a plan that still leaves room to wander.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuAvM2OTp2gDpKOxH_Kl-WmlyBp8GHw7-mZjEbwr8_B6HUY4UvNNGqKC6-Z7rcU_c9ZsFgVi-9wYCMyUCr_xO26X_usQChYzFsmDyA_WEMQzi-eIH3BlUOLXRTB--i5oQgIEToK8PWa-Ywq3DDAXKgnRl6OztI_LdZXmf52qrCa7OM5FuA-tPOMLXege9SPYNoCRbZT-4d0d5zuRiloVcMhJyNO48vsaDOXSe4x-q-NoLFLgjYSi-t77-PPu1i9RB5ZtOJj_Kx82vjVL',
+        icon: Icons.flight_takeoff,
+        ctaLabel: 'Start Planning',
+        onCta: () => Navigator.of(context).pushNamed('/dashboard'),
+      ),
+    ];
   }
 
   void _scrollToKey(GlobalKey key) {

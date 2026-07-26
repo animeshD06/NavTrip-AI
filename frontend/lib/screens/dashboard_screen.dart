@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../models/itinerary.dart';
 import '../providers/trip_planner_controller.dart';
 import '../theme/navtrip_theme.dart';
+import '../widgets/home/travel_stack_scroller.dart';
 import 'tourist_map_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final _scrollController = ScrollController();
   bool _initialized = false;
 
   @override
@@ -33,6 +35,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final controller = context.watch<TripPlannerController>();
@@ -47,6 +55,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Stack(
             children: [
               ListView(
+                controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(
                   width < 600 ? 20 : 64,
                   0,
@@ -60,24 +69,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onProfile: () => _showProfileMenu(context, auth),
                   ),
                   const SizedBox(height: 28),
-                  _WelcomeHeader(
-                    destination: controller.destination,
-                    userName: auth.currentUser?.displayName ?? 'Traveler',
-                    connected: controller.backendConnected,
-                    status: controller.backendStatus,
-                    onReconnect: controller.isCheckingBackend
-                        ? null
-                        : () async {
-                            await controller.checkBackend();
-                            if (controller.backendConnected) {
-                              await controller.loadPlaces();
-                            }
-                          },
-                  ),
-                  const SizedBox(height: 28),
-                  _SpotlightCard(
-                    onViewItinerary: () => _goToItinerary(context, controller),
-                    onEditNotes: () => _toast('Notes editor preview'),
+                  TravelStackScroller(
+                    scrollController: _scrollController,
+                    desktopHeightFactor: 1.15,
+                    cards: _dashboardStackCards(
+                      auth: auth,
+                      controller: controller,
+                    ),
                   ),
                   const SizedBox(height: 28),
                   if (isDesktop)
@@ -129,6 +127,90 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  List<TravelStackCardData> _dashboardStackCards({
+    required AuthProvider auth,
+    required TripPlannerController controller,
+  }) {
+    final userName = auth.currentUser?.displayName ?? 'Traveler';
+    final destination = controller.destination;
+    final statusChips = Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        _StatusPill(
+          label: controller.backendConnected
+              ? 'Backend connected'
+              : 'Backend offline',
+          icon:
+              controller.backendConnected ? Icons.cloud_done : Icons.cloud_off,
+        ),
+        _StatusPill(label: 'Planning for $destination', icon: Icons.place),
+        _StatusPill(label: controller.backendStatus, icon: Icons.info_outline),
+        if (!controller.isCheckingBackend)
+          ActionChip(
+            avatar: const Icon(Icons.refresh, size: 16),
+            label: const Text('Reconnect'),
+            onPressed: () async {
+              await controller.checkBackend();
+              if (controller.backendConnected) {
+                await controller.loadPlaces();
+              }
+            },
+          ),
+      ],
+    );
+
+    return [
+      TravelStackCardData(
+        badge: 'DASHBOARD',
+        title: 'Welcome Back, $userName',
+        subtitle:
+            'Your trips, notes, pins, and route ideas are gathered into one calm planning desk.',
+        quote: 'Not all those who wander are lost, but some need a better map.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuDcaoykP8GYJS_PcuSy8Z5MsdQsfRP5yoxYavgicUHxgiD9cY-kKxCGaeJ80z8PcKWBkPt6fK-g6LRz4Xd_j00E3JzmVbHqdrgAMch51pDNPPP2u3nv0YOJXPIiGGKQv46huMOLX4Pd9Bz7PUm4sm92jVpgxpOB8KK3yJKmzkvQsKChf-ZWkQtN7iW48uYkhqcQRFoMVrWTl2jq-c9vaPAep-tUYAGNmGeLHep1xowOWr92tBZMxvrRhUnOPsWTOkTzNsZwBU9TRK0i',
+        trailing: statusChips,
+      ),
+      TravelStackCardData(
+        badge: 'TODAY\'S SPOTLIGHT',
+        title: 'Autumn in the Scottish Highlands',
+        subtitle:
+            'Your itinerary is looking spectacular. Hidden stops, route notes, and map context are ready when you are.',
+        quote: 'A road becomes a story when the stops are chosen with care.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuC9NmwaW7BBkFcjJs8MRalpoUSctS9aLxf9A3z0nKoReBW6owD2T57Cr4fukvl-Z90Rsm-ZMfmo46uAcPrscRM4-rPZKH0OSOC-sArA8lzEjrMl2-jh0o6EL9mRwDpPMiO6gQDNPSzQRfSAEmXc8KFOx6f5SJ62PPPgaBc3u4dxLVgMLFG6BGrN0d20ep7a_yOg95k3mWJ1ZWmWzDl5A-yBvoOK3JUXOy2DT4jEXQ4hZijrYtT55DvpdiQRyt39fUuW2UodoJOrc1-f',
+        primaryLabel: 'View Itinerary',
+        onPrimary: () => _goToItinerary(context, controller),
+        secondaryLabel: 'Edit Notes',
+        onSecondary: () => _toast('Notes editor preview'),
+      ),
+      TravelStackCardData(
+        badge: 'SMART PINBOARD',
+        title: 'Your saved places are waiting in context.',
+        subtitle:
+            'Keep inspiration close, then open each place on the map when it is time to turn pins into movement.',
+        quote: 'Collect places like postcards, then arrange them like a day.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuCjHVtVcf5pUDBcddizpfb9nfeINpnEgWtrq-HMvA2aD9ilQLk2IsmkcNVpoR08XvpsdVQ93Zl5SEY9fqqK8VToD0RZEBQu97rr12Efx8ZdeWll2Vq24cjhYhBJDSDi_9pZf-mpsPv22b-kppUQxidiU5nagOOC6v9lpSQMTa4qO0hjEKR929OAY4m4sn-IstAgDZsEZNlA8E2lE5w_5Ca53MUkcXnfWSnQG-P6s1C1B-LJkpGCp5W88q52MSVtroABrxBuVBSNr1Ie',
+        primaryLabel: 'Open Trip Map',
+        onPrimary: () => Navigator.of(context).pushNamed('/trip-map'),
+      ),
+      TravelStackCardData(
+        badge: 'READY TO MOVE',
+        title: 'Open the plan, adjust the day, keep traveling.',
+        subtitle:
+            'Use the dashboard as a living travel desk: itinerary, map, notes, budget, and timing all close at hand.',
+        quote: 'The plan should support the trip, never steal the view.',
+        image:
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuAvM2OTp2gDpKOxH_Kl-WmlyBp8GHw7-mZjEbwr8_B6HUY4UvNNGqKC6-Z7rcU_c9ZsFgVi-9wYCMyUCr_xO26X_usQChYzFsmDyA_WEMQzi-eIH3BlUOLXRTB--i5oQgIEToK8PWa-Ywq3DDAXKgnRl6OztI_LdZXmf52qrCa7OM5FuA-tPOMLXege9SPYNoCRbZT-4d0d5zuRiloVcMhJyNO48vsaDOXSe4x-q-NoLFLgjYSi-t77-PPu1i9RB5ZtOJj_Kx82vjVL',
+        primaryLabel: 'View Itinerary',
+        onPrimary: () => _goToItinerary(context, controller),
+        secondaryLabel: 'Open Map',
+        onSecondary: () => Navigator.of(context).pushNamed('/trip-map'),
+      ),
+    ];
   }
 
   Future<void> _goToItinerary(
