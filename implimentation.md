@@ -65,10 +65,10 @@ Goal: prepare the backend for tourist places, trips, and itineraries.
 
 Tables:
 
-- [ ] `users`
-- [ ] `tourist_places`
-- [ ] `trips`
-- [ ] `itineraries`
+- [x] `users`
+- [x] `tourist_places`
+- [x] `trips`
+- [x] `itineraries`
 
 Backend tasks:
 
