@@ -12,6 +12,7 @@ import '../services/geofencing_voice_tour_service.dart';
 import '../services/api_client.dart';
 import '../services/voice_narration_service.dart';
 import '../theme/navtrip_theme.dart';
+import '../widgets/home/trip_location_and_details_sheet.dart';
 
 class TouristMapScreen extends StatefulWidget {
   const TouristMapScreen({
@@ -254,8 +255,7 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
               Text(place.description),
               const SizedBox(height: 12),
               Text('Open ${place.openingTime} to ${place.closingTime}'),
-              const SizedBox(height: 16),
-              Wrap(
+              const SizedBox(height: 16),              Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
@@ -300,33 +300,63 @@ class _HeaderBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<TripPlannerController>();
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: MediaQuery.sizeOf(context).width < 600 ? 20 : 64, vertical: 14),
+      padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.sizeOf(context).width < 600 ? 20 : 64,
+          vertical: 14),
       decoration: const BoxDecoration(
         color: NavTripPalette.surface,
-        boxShadow: [BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.05), blurRadius: 8, offset: Offset(0, 1))],
+        boxShadow: [
+          BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.05),
+              blurRadius: 8,
+              offset: Offset(0, 1))
+        ],
       ),
       child: Row(
         children: [
           IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
           const SizedBox(width: 6),
-          Expanded(child: Text(title, style: Theme.of(context).textTheme.displayMedium?.copyWith(color: NavTripPalette.terracottaDeep, fontSize: MediaQuery.sizeOf(context).width < 600 ? 30 : 40))),
-          if (MediaQuery.sizeOf(context).width >= 720)
-            Wrap(
-              spacing: 10,
-              children: [
-                OutlinedButton.icon(onPressed: onAr, icon: const Icon(Icons.view_in_ar), label: const Text('AR')), 
-                OutlinedButton.icon(onPressed: onStop, icon: const Icon(Icons.volume_off), label: const Text('Stop')),
-                OutlinedButton.icon(onPressed: onLocation, icon: const Icon(Icons.my_location), label: const Text('Locate')),
-              ],
-            )
-          else
-            Row(
-              children: [
-                IconButton(onPressed: onAr, icon: const Icon(Icons.view_in_ar)),
-                IconButton(onPressed: onLocation, icon: const Icon(Icons.my_location)),
-              ],
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    color: NavTripPalette.terracottaDeep,
+                    fontSize:
+                        MediaQuery.sizeOf(context).width < 600 ? 30 : 40,
+                  ),
             ),
+          ),
+          Wrap(
+            spacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => TripLocationAndDetailsSheet.show(context),
+                icon: const Icon(Icons.edit_location_alt_outlined, size: 16),
+                label: Text(controller.destination),
+              ),
+              if (MediaQuery.sizeOf(context).width >= 720) ...[
+                OutlinedButton.icon(
+                    onPressed: onAr,
+                    icon: const Icon(Icons.view_in_ar),
+                    label: const Text('AR')),
+                OutlinedButton.icon(
+                    onPressed: onStop,
+                    icon: const Icon(Icons.volume_off),
+                    label: const Text('Stop')),
+                OutlinedButton.icon(
+                    onPressed: onLocation,
+                    icon: const Icon(Icons.my_location),
+                    label: const Text('Locate')),
+              ] else ...[
+                IconButton(onPressed: onAr, icon: const Icon(Icons.view_in_ar)),
+                IconButton(
+                    onPressed: onLocation, icon: const Icon(Icons.my_location)),
+              ],
+            ],
+          ),
         ],
       ),
     );

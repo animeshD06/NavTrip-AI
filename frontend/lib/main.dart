@@ -176,7 +176,7 @@ class _NavTripAppShell extends StatelessWidget {
             ),
         '/trip-details': (_) => const AuthGuard(
               protectedRoute: '/trip-details',
-              child: TouristMapScreen(),
+              child: ItineraryScreen(),
             ),
         '/trip-map': (_) => const AuthGuard(
               protectedRoute: '/trip-map',

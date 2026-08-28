@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/tourist_place.dart';
@@ -7,6 +7,7 @@ import '../models/itinerary.dart';
 import '../providers/trip_planner_controller.dart';
 import '../theme/navtrip_theme.dart';
 import '../widgets/home/travel_stack_scroller.dart';
+import '../widgets/home/trip_location_and_details_sheet.dart';
 import 'tourist_map_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -65,8 +66,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _TopBar(
                     auth: auth,
+                    controller: controller,
                     onSignIn: () => Navigator.of(context).pushNamed('/login'),
                     onProfile: () => _showProfileMenu(context, auth),
+                    onSelectLocation: () =>
+                        TripLocationAndDetailsSheet.show(context),
                   ),
                   if (controller.isLoading ||
                       controller.errorMessage != null ||
@@ -89,37 +93,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                            child: _PinboardSection(
-                                places: places,
-                                onOpenMap: (place) => Navigator.of(context)
-                                    .push(MaterialPageRoute(
-                                        builder: (_) => TouristMapScreen(
-                                            initialPlace: place))))),
+                          child: _PinboardSection(
+                            controller: controller,
+                            places: places,
+                            onOpenMap: (place) => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    TouristMapScreen(initialPlace: place),
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(width: 24),
                         SizedBox(
-                            width: 340,
-                            child: _TimelineAndMapSection(
-                                controller: controller,
-                                onOpenTrip: () => Navigator.of(context)
-                                    .pushNamed('/trip-details'),
-                                onOpenMap: () => Navigator.of(context)
-                                    .pushNamed('/trip-map'))),
+                          width: 340,
+                          child: _TimelineAndMapSection(
+                            controller: controller,
+                            onOpenTrip: () => Navigator.of(context)
+                                .pushNamed('/trip-details'),
+                            onOpenMap: () =>
+                                Navigator.of(context).pushNamed('/trip-map'),
+                          ),
+                        ),
                       ],
                     )
                   else ...[
                     _PinboardSection(
-                        places: places,
-                        onOpenMap: (place) => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) =>
-                                    TouristMapScreen(initialPlace: place)))),
+                      controller: controller,
+                      places: places,
+                      onOpenMap: (place) => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => TouristMapScreen(initialPlace: place),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
                     _TimelineAndMapSection(
-                        controller: controller,
-                        onOpenTrip: () =>
-                            Navigator.of(context).pushNamed('/trip-details'),
-                        onOpenMap: () =>
-                            Navigator.of(context).pushNamed('/trip-map')),
+                      controller: controller,
+                      onOpenTrip: () =>
+                          Navigator.of(context).pushNamed('/trip-details'),
+                      onOpenMap: () =>
+                          Navigator.of(context).pushNamed('/trip-map'),
+                    ),
                   ],
                 ],
               ),
@@ -146,6 +161,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final statusChips = Wrap(
       spacing: 10,
       runSpacing: 10,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         _StatusPill(
           label: controller.backendConnected
@@ -154,8 +170,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
           icon:
               controller.backendConnected ? Icons.cloud_done : Icons.cloud_off,
         ),
-        _StatusPill(label: 'Planning for $destination', icon: Icons.place),
-        _StatusPill(label: controller.backendStatus, icon: Icons.info_outline),
+        _StatusPill(
+            label: 'Destination: $destination (${controller.days} Days)',
+            icon: Icons.place),
+        _StatusPill(
+            label: 'Vibe: ${controller.category.toUpperCase()}',
+            icon: Icons.tune),
+        ActionChip(
+          avatar: const Icon(Icons.edit_location_alt_outlined,
+              size: 16, color: NavTripPalette.terracotta),
+          label: const Text('Change Location & Vibe'),
+          onPressed: () => TripLocationAndDetailsSheet.show(context),
+        ),
         if (!controller.isCheckingBackend)
           ActionChip(
             avatar: const Icon(Icons.refresh, size: 16),
@@ -175,7 +201,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         badge: 'DASHBOARD',
         title: 'Welcome Back, $userName',
         subtitle:
-            'Your trips, notes, pins, and route ideas are gathered into one calm planning desk.',
+            'Planning for $destination. Your trips, notes, pins, and route ideas are gathered into one calm planning desk.',
         quote: 'Not all those who wander are lost, but some need a better map.',
         image:
             'https://lh3.googleusercontent.com/aida-public/AB6AXuDcaoykP8GYJS_PcuSy8Z5MsdQsfRP5yoxYavgicUHxgiD9cY-kKxCGaeJ80z8PcKWBkPt6fK-g6LRz4Xd_j00E3JzmVbHqdrgAMch51pDNPPP2u3nv0YOJXPIiGGKQv46huMOLX4Pd9Bz7PUm4sm92jVpgxpOB8KK3yJKmzkvQsKChf-ZWkQtN7iW48uYkhqcQRFoMVrWTl2jq-c9vaPAep-tUYAGNmGeLHep1xowOWr92tBZMxvrRhUnOPsWTOkTzNsZwBU9TRK0i',
@@ -183,20 +209,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       TravelStackCardData(
         badge: 'TODAY\'S SPOTLIGHT',
-        title: 'Autumn in the Scottish Highlands',
+        title: '$destination Itinerary (${controller.days} Days)',
         subtitle:
-            'Your itinerary is looking spectacular. Hidden stops, route notes, and map context are ready when you are.',
+            'Your travel schedule for $destination is ready. Custom stops, route notes, and map context are balanced for your pace.',
         quote: 'A road becomes a story when the stops are chosen with care.',
         image:
             'https://lh3.googleusercontent.com/aida-public/AB6AXuC9NmwaW7BBkFcjJs8MRalpoUSctS9aLxf9A3z0nKoReBW6owD2T57Cr4fukvl-Z90Rsm-ZMfmo46uAcPrscRM4-rPZKH0OSOC-sArA8lzEjrMl2-jh0o6EL9mRwDpPMiO6gQDNPSzQRfSAEmXc8KFOx6f5SJ62PPPgaBc3u4dxLVgMLFG6BGrN0d20ep7a_yOg95k3mWJ1ZWmWzDl5A-yBvoOK3JUXOy2DT4jEXQ4hZijrYtT55DvpdiQRyt39fUuW2UodoJOrc1-f',
         primaryLabel: 'View Itinerary',
         onPrimary: () => _goToItinerary(context, controller),
-        secondaryLabel: 'Edit Notes',
-        onSecondary: () => _toast('Notes editor preview'),
+        secondaryLabel: 'Change Location',
+        onSecondary: () => TripLocationAndDetailsSheet.show(context),
       ),
       TravelStackCardData(
         badge: 'SMART PINBOARD',
-        title: 'Your saved places are waiting in context.',
+        title: 'Places in $destination and inspired routes.',
         subtitle:
             'Keep inspiration close, then open each place on the map when it is time to turn pins into movement.',
         quote: 'Collect places like postcards, then arrange them like a day.',
@@ -231,11 +257,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (_) => const ItineraryScreen()));
-  }
-
-  void _toast(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _showProfileMenu(BuildContext context, AuthProvider auth) async {
@@ -291,91 +312,120 @@ class _DashboardScreenState extends State<DashboardScreen> {
 class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.auth,
+    required this.controller,
     required this.onSignIn,
     required this.onProfile,
+    required this.onSelectLocation,
   });
 
   final AuthProvider auth;
+  final TripPlannerController controller;
   final VoidCallback onSignIn;
   final VoidCallback onProfile;
+  final VoidCallback onSelectLocation;
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final isCompact = width < 720;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'NavTrip-AI',
-          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: NavTripPalette.terracottaDeep,
-                fontSize: MediaQuery.sizeOf(context).width < 600 ? 34 : 44,
-              ),
-        ),
-        auth.isAuthenticated
-            ? OutlinedButton.icon(
-                onPressed: onProfile,
-                icon: const Icon(Icons.person_outline),
-                label: Text(auth.currentUser?.displayName ?? 'Profile'),
-              )
-            : TextButton(onPressed: onSignIn, child: const Text('Sign In')),
-      ],
-    );
-  }
-}
-
-// ignore: unused_element
-class _WelcomeHeader extends StatelessWidget {
-  const _WelcomeHeader({
-    required this.destination,
-    required this.userName,
-    required this.connected,
-    required this.status,
-    required this.onReconnect,
-  });
-
-  final String destination;
-  final String userName;
-  final bool connected;
-  final String status;
-  final VoidCallback? onReconnect;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Welcome Back, $userName',
-          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                color: NavTripPalette.terracotta,
-                fontSize: MediaQuery.sizeOf(context).width < 600 ? 36 : 54,
-              ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          '"Not all those who wander are lost, but some need a better map."',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: NavTripPalette.mutedInk,
-                fontStyle: FontStyle.italic,
-              ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
+        Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            _StatusPill(
-              label: connected ? 'Backend connected' : 'Backend offline',
-              icon: connected ? Icons.cloud_done : Icons.cloud_off,
+            Text(
+              'NavTrip-AI',
+              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    color: NavTripPalette.terracottaDeep,
+                    fontSize: isCompact ? 30 : 44,
+                  ),
             ),
-            _StatusPill(label: 'Planning for $destination', icon: Icons.place),
-            _StatusPill(label: status, icon: Icons.info_outline),
-            if (onReconnect != null)
-              ActionChip(
-                avatar: const Icon(Icons.refresh, size: 16),
-                label: const Text('Reconnect'),
-                onPressed: onReconnect,
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InkWell(
+              onTap: onSelectLocation,
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isCompact ? 10 : 14,
+                  vertical: isCompact ? 6 : 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: NavTripPalette.terracotta.withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(154, 52, 18, 0.08),
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.place,
+                        size: 16, color: NavTripPalette.terracotta),
+                    const SizedBox(width: 6),
+                    Text(
+                      controller.destination,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: NavTripPalette.ink,
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '(${controller.days}D)',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: NavTripPalette.mutedInk,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 16,
+                      color: NavTripPalette.terracotta,
+                    ),
+                  ],
+                ),
               ),
+            ),
+            const SizedBox(width: 10),
+            if (!isCompact)
+              FilledButton.icon(
+                onPressed: onSelectLocation,
+                style: FilledButton.styleFrom(
+                  backgroundColor: NavTripPalette.terracotta,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                icon: const Icon(Icons.travel_explore, size: 18),
+                label: const Text('Plan Trip'),
+              ),
+            if (!isCompact) const SizedBox(width: 10),
+            auth.isAuthenticated
+                ? OutlinedButton.icon(
+                    onPressed: onProfile,
+                    icon: const Icon(Icons.person_outline),
+                    label: Text(
+                      isCompact
+                          ? (auth.currentUser?.displayName.split(' ').first ??
+                              'Profile')
+                          : (auth.currentUser?.displayName ?? 'Profile'),
+                    ),
+                  )
+                : TextButton(onPressed: onSignIn, child: const Text('Sign In')),
           ],
         ),
       ],
@@ -383,163 +433,14 @@ class _WelcomeHeader extends StatelessWidget {
   }
 }
 
-class _ProfileInfoRow extends StatelessWidget {
-  const _ProfileInfoRow({
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 96,
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: NavTripPalette.mutedInk,
-                ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SelectableText(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.label, required this.icon});
-
-  final String label;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xffdec0b7)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: NavTripPalette.terracotta),
-          const SizedBox(width: 8),
-          Text(label, style: Theme.of(context).textTheme.labelLarge),
-        ],
-      ),
-    );
-  }
-}
-
-// ignore: unused_element
-class _SpotlightCard extends StatelessWidget {
-  const _SpotlightCard({
-    required this.onViewItinerary,
-    required this.onEditNotes,
-  });
-
-  final VoidCallback onViewItinerary;
-  final VoidCallback onEditNotes;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: NavTripStyles.paperCard(context: context, radius: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: NavTripPalette.terracotta,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                  child: const Text('Today\'s Spotlight',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.4)),
-                ),
-                const SizedBox(height: 16),
-                Text('Autumn in the Scottish Highlands',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: NavTripPalette.terracottaDeep, fontSize: 34)),
-                const SizedBox(height: 12),
-                Text(
-                  'Your itinerary is looking spectacular. We\'ve surfaced a few hidden stops and a route note you can open from the trip map.',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: NavTripPalette.mutedInk),
-                ),
-                const SizedBox(height: 20),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    FilledButton(
-                        onPressed: onViewItinerary,
-                        child: const Text('View Itinerary')),
-                    OutlinedButton(
-                        onPressed: onEditNotes,
-                        child: const Text('Edit Notes')),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 24),
-          SizedBox(
-            width: 320,
-            child: Transform.rotate(
-              angle: 0.03,
-              child: Container(
-                decoration: NavTripStyles.polaroidCard(context: context),
-                padding: const EdgeInsets.all(12),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
-                  child: Image.network(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuDcaoykP8GYJS_PcuSy8Z5MsdQsfRP5yoxYavgicUHxgiD9cY-kKxCGaeJ80z8PcKWBkPt6fK-g6LRz4Xd_j00E3JzmVbHqdrgAMch51pDNPPP2u3nv0YOJXPIiGGKQv46huMOLX4Pd9Bz7PUm4sm92jVpgxpOB8KK3yJKmzkvQsKChf-ZWkQtN7iW48uYkhqcQRFoMVrWTl2jq-c9vaPAep-tUYAGNmGeLHep1xowOWr92tBZMxvrRhUnOPsWTOkTzNsZwBU9TRK0i',
-                    height: 320,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _PinboardSection extends StatelessWidget {
   const _PinboardSection({
+    required this.controller,
     required this.places,
     required this.onOpenMap,
   });
 
+  final TripPlannerController controller;
   final List<TouristPlace> places;
   final ValueChanged<TouristPlace> onOpenMap;
 
@@ -556,10 +457,11 @@ class _PinboardSection extends StatelessWidget {
                     .textTheme
                     .headlineMedium
                     ?.copyWith(color: NavTripPalette.mutedInk)),
-            TextButton(
-                onPressed: () =>
-                    Navigator.of(context).pushNamed('/trip-details'),
-                child: const Text('See all trips')),
+            TextButton.icon(
+              onPressed: () => TripLocationAndDetailsSheet.show(context),
+              icon: const Icon(Icons.add_location_alt_outlined, size: 18),
+              label: const Text('Add / Plan New'),
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -574,31 +476,62 @@ class _PinboardSection extends StatelessWidget {
             _TripCard(
               image:
                   'https://lh3.googleusercontent.com/aida-public/AB6AXuC9NmwaW7BBkFcjJs8MRalpoUSctS9aLxf9A3z0nKoReBW6owD2T57Cr4fukvl-Z90Rsm-ZMfmo46uAcPrscRM4-rPZKH0OSOC-sArA8lzEjrMl2-jh0o6EL9mRwDpPMiO6gQDNPSzQRfSAEmXc8KFOx6f5SJ62PPPgaBc3u4dxLVgMLFG6BGrN0d20ep7a_yOg95k3mWJ1ZWmWzDl5A-yBvoOK3JUXOy2DT4jEXQ4hZijrYtT55DvpdiQRyt39fUuW2UodoJOrc1-f',
-              date: 'OCT 12',
+              date: 'ACTIVE',
               title: 'Roman Escapade',
-              subtitle: 'Italy • 5 Days',
-              footer: '32 PINNED SPOTS',
-              onTap: () => Navigator.of(context).pushNamed('/trip-details'),
+              subtitle: 'Italy • 5 Days • Heritage',
+              footer: 'TAP TO PLAN ROME',
+              onTap: () async {
+                await controller.selectPresetDestination('Rome',
+                    newCategory: 'historical', newDays: 5);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Switched destination to Rome! Generated custom itinerary.')),
+                  );
+                }
+              },
             ),
             _TripCard(
               image:
                   'https://lh3.googleusercontent.com/aida-public/AB6AXuCjHVtVcf5pUDBcddizpfb9nfeINpnEgWtrq-HMvA2aD9ilQLk2IsmkcNVpoR08XvpsdVQ93Zl5SEY9fqqK8VToD0RZEBQu97rr12Efx8ZdeWll2Vq24cjhYhBJDSDi_9pZf-mpsPv22b-kppUQxidiU5nagOOC6v9lpSQMTa4qO0hjEKR929OAY4m4sn-IstAgDZsEZNlA8E2lE5w_5Ca53MUkcXnfWSnQG-P6s1C1B-LJkpGCp5W88q52MSVtroABrxBuVBSNr1Ie',
-              date: 'NOV 04',
+              date: 'ACTIVE',
               title: 'Kyoto Serenity',
-              subtitle: 'Japan • 12 Days',
-              footer: '14 PINNED SPOTS',
-              onTap: () => onOpenMap(places.first),
+              subtitle: 'Japan • 4 Days • Culture',
+              footer: 'TAP TO PLAN KYOTO',
+              onTap: () async {
+                await controller.selectPresetDestination('Kyoto',
+                    newCategory: 'historical', newDays: 4);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Switched destination to Kyoto! Generated custom itinerary.')),
+                  );
+                }
+              },
             ),
             _StickyDraftCard(
-                onTap: () => Navigator.of(context).pushNamed('/dashboard')),
+              onTap: () => TripLocationAndDetailsSheet.show(context),
+            ),
             _TripCard(
               image:
                   'https://lh3.googleusercontent.com/aida-public/AB6AXuDqSr-jDZ3s6sJ4MHVblLt9e-M5iEWpK60asKVE_30veuVDeQXEIT3nErCK9WawEgngsA5OrM20FTWtwaDk8xx4gVQb_XnB7HB05-_JRuPaNkZpO-t4WtFNdg5Z5_zmJe7B4A3ifbPN_yRgUEVOJdZtc_mDW1aJ-M5F5SgVuBrQ7n6NpdtnQnkuHEmZxBTmmNTlGwwA1hsMlh7c48gIJjKt1F6GUNqjKMhW6_SR3vr9-rzm1P0TqzG10OxZLr_g7-mVRSPtcy-ecQWH',
-              date: 'APR 27',
+              date: 'ACTIVE',
               title: 'Iceland Ring Road',
-              subtitle: 'Iceland • 10 Days',
-              footer: '9 PINNED SPOTS',
-              onTap: () => Navigator.of(context).pushNamed('/trip-map'),
+              subtitle: 'Iceland • 7 Days • Adventure',
+              footer: 'TAP TO PLAN ICELAND',
+              onTap: () async {
+                await controller.selectPresetDestination('Iceland Ring Road',
+                    newCategory: 'adventure', newDays: 7);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text('Switched destination to Iceland Ring Road!')),
+                  );
+                }
+              },
             ),
           ],
         ),
@@ -725,60 +658,37 @@ class _StickyDraftCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: NavTripStyles.stickyNote(),
+        decoration: NavTripStyles.stickyNote(context: context),
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Icon(Icons.push_pin, color: NavTripPalette.terracotta),
-                Text('Draft',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.2)),
-              ],
+            const Icon(Icons.push_pin,
+                color: NavTripPalette.terracotta, size: 24),
+            const SizedBox(height: 12),
+            Text(
+              'Drafting Ideas',
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(color: NavTripPalette.terracottaDeep),
             ),
-            const SizedBox(height: 20),
-            Text('Next Adventure?',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(fontStyle: FontStyle.italic)),
-            const SizedBox(height: 10),
-            _UnderlineNote(text: 'Maybe the Patagonia trails?'),
-            _UnderlineNote(text: 'Check flights for February'),
+            const SizedBox(height: 8),
+            Text(
+              'Looking to explore somewhere new? Tap to open the trip location and details menu to choose from 10+ curated destinations or plan custom journeys worldwide.',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: NavTripPalette.mutedInk),
+            ),
             const Spacer(),
-            OutlinedButton.icon(
+            FilledButton.tonalIcon(
               onPressed: onTap,
-              icon: const Icon(Icons.add),
-              label: const Text('New Trip'),
+              icon: const Icon(Icons.tune, size: 16),
+              label: const Text('Choose Destination'),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _UnderlineNote extends StatelessWidget {
-  const _UnderlineNote({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontStyle: FontStyle.italic,
-              decoration: TextDecoration.underline,
-              decorationStyle: TextDecorationStyle.dashed,
-            ),
       ),
     );
   }
@@ -801,7 +711,7 @@ class _TimelineAndMapSection extends StatelessWidget {
       children: [
         Container(
           decoration: NavTripStyles.paperCard(context: context, radius: 14),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -813,7 +723,8 @@ class _TimelineAndMapSection extends StatelessWidget {
               const SizedBox(height: 20),
               _ActivityLine(
                   time: 'LOCAL CACHE',
-                  title: '${controller.cachedTrips.length} saved offline ${controller.cachedTrips.length == 1 ? 'trip' : 'trips'}',
+                  title:
+                      '${controller.cachedTrips.length} saved offline ${controller.cachedTrips.length == 1 ? 'trip' : 'trips'}',
                   body: controller.offlineTripLoaded
                       ? 'The latest cached itinerary is active because the backend is unavailable.'
                       : 'Generated itineraries are saved locally after each successful plan.'),
@@ -852,12 +763,13 @@ class _TimelineAndMapSection extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(14),
                   child: Opacity(
-                      opacity: 0.62,
-                      child: Image.network(
-                          'https://lh3.googleusercontent.com/aida-public/AB6AXuDqSr-jDZ3s6sJ4MHVblLt9e-M5iEWpK60asKVE_30veuVDeQXEIT3nErCK9WawEgngsA5OrM20FTWtwaDk8xx4gVQb_XnB7HB05-_JRuPaNkZpO-t4WtFNdg5Z5_zmJe7B4A3ifbPN_yRgUEVOJdZtc_mDW1aJ-M5F5SgVuBrQ7n6NpdtnQnkuHEmZxBTmmNTlGwwA1hsMlh7c48gIJjKt1F6GUNqjKMhW6_SR3vr9-rzm1P0TqzG10OxZLr_g7-mVRSPtcy-ecQWH',
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              const SizedBox.shrink())),
+                    opacity: 0.62,
+                    child: Image.network(
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuDqSr-jDZ3s6sJ4MHVblLt9e-M5iEWpK60asKVE_30veuVDeQXEIT3nErCK9WawEgngsA5OrM20FTWtwaDk8xx4gVQb_XnB7HB05-_JRuPaNkZpO-t4WtFNdg5Z5_zmJe7B4A3ifbPN_yRgUEVOJdZtc_mDW1aJ-M5F5SgVuBrQ7n6NpdtnQnkuHEmZxBTmmNTlGwwA1hsMlh7c48gIJjKt1F6GUNqjKMhW6_SR3vr9-rzm1P0TqzG10OxZLr_g7-mVRSPtcy-ecQWH',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
                 ),
               ),
               Positioned(
@@ -917,7 +829,7 @@ class _TimelineAndMapSection extends StatelessWidget {
                                   .labelMedium
                                   ?.copyWith(color: NavTripPalette.mutedInk)),
                           const SizedBox(height: 4),
-                          Text('Portree, Highlands',
+                          Text(controller.destination,
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineSmall
@@ -925,9 +837,21 @@ class _TimelineAndMapSection extends StatelessWidget {
                                       color: NavTripPalette.terracottaDeep)),
                         ],
                       ),
-                      TextButton(
-                          onPressed: onOpenMap,
-                          child: const Text('Expand Map')),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: 'Change Destination',
+                            onPressed: () =>
+                                TripLocationAndDetailsSheet.show(context),
+                            icon: const Icon(Icons.edit_location_alt_outlined,
+                                size: 20, color: NavTripPalette.terracotta),
+                          ),
+                          TextButton(
+                              onPressed: onOpenMap,
+                              child: const Text('Expand Map')),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -1145,11 +1069,11 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
                                     builder: (_) => TouristMapScreen(
                                         routeDay: currentDay))))),
                     const SizedBox(width: 24),
-                    SizedBox(width: 320, child: _SidebarWidgets()),
+                    const SizedBox(width: 320, child: _SidebarWidgets()),
                   ],
                 )
               else ...[
-                _SidebarWidgets(),
+                const _SidebarWidgets(),
                 const SizedBox(height: 16),
                 _TimelineCard(
                     day: currentDay,
@@ -1184,7 +1108,7 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
                     style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 8),
                 Text(
-                  'Create one from the dashboard to see the journal-style timeline here.',
+                  'Create one from the dashboard or choose another destination to see the journal-style timeline here.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
@@ -1203,6 +1127,11 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
                         if (mounted) setState(() {});
                       },
                       child: const Text('Generate Itinerary'),
+                    ),
+                    OutlinedButton(
+                      onPressed: () =>
+                          TripLocationAndDetailsSheet.show(context),
+                      child: const Text('Change Location & Vibe'),
                     ),
                     OutlinedButton(
                       onPressed: () =>
@@ -1227,10 +1156,12 @@ class _HeaderBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final isCompact = width < 680;
+
     return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: MediaQuery.sizeOf(context).width < 600 ? 20 : 64,
-          vertical: 18),
+          horizontal: isCompact ? 16 : 64, vertical: 16),
       decoration: const BoxDecoration(
         color: NavTripPalette.surface,
         boxShadow: [
@@ -1243,15 +1174,45 @@ class _HeaderBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('NavTrip-AI',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: NavTripPalette.terracottaDeep,
-                  fontSize: MediaQuery.sizeOf(context).width < 600 ? 34 : 44)),
-          Text(destination,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelLarge
-                  ?.copyWith(color: NavTripPalette.mutedInk)),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                tooltip: 'Back to Dashboard',
+                icon: const Icon(Icons.arrow_back,
+                    color: NavTripPalette.terracottaDeep),
+                onPressed: () => Navigator.of(context).pushNamed('/dashboard'),
+              ),
+              const SizedBox(width: 8),
+              Text('NavTrip-AI',
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: NavTripPalette.terracottaDeep,
+                      fontSize: isCompact ? 28 : 40)),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => TripLocationAndDetailsSheet.show(context),
+                icon: const Icon(Icons.edit_location_alt_outlined, size: 16),
+                label: Text(isCompact ? 'Change' : 'Change Location / Vibe'),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: NavTripPalette.terracotta.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(destination,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: NavTripPalette.terracottaDeep,
+                        fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -1486,10 +1447,10 @@ class _SidebarWidgets extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              _KeyValueRow(label: 'Current', value: '-2°C'),
-              _KeyValueRow(label: 'Wind', value: '24 km/h'),
+              const _KeyValueRow(label: 'Current', value: '22°C Mild'),
+              const _KeyValueRow(label: 'Wind', value: '14 km/h'),
               const SizedBox(height: 10),
-              Text('Pack layers. The wind bites today.',
+              Text('Great exploration conditions today.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontStyle: FontStyle.italic,
                       color: NavTripPalette.mutedInk)),
@@ -1511,19 +1472,21 @@ class _SidebarWidgets extends StatelessWidget {
                       ?.copyWith(color: NavTripPalette.terracottaDeep)),
               const SizedBox(height: 14),
               const _BudgetBar(
-                  label: 'Car & Fuel', value: r'$1,200', fraction: 0.75),
-              const SizedBox(height: 12),
-              const _BudgetBar(label: 'Stay', value: r'$1,800', fraction: 0.6),
+                  label: 'Activities & Visits', value: r'$350', fraction: 0.65),
               const SizedBox(height: 12),
               const _BudgetBar(
-                  label: 'Food & Misc', value: r'$800', fraction: 0.4),
+                  label: 'Stay & Hotels', value: r'$580', fraction: 0.8),
+              const SizedBox(height: 12),
+              const _BudgetBar(
+                  label: 'Food & Local Dining', value: r'$240', fraction: 0.45),
               const SizedBox(height: 14),
               const Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Total', style: Theme.of(context).textTheme.labelLarge),
-                  Text(r'$3,800',
+                  Text('Total Estimated',
+                      style: Theme.of(context).textTheme.labelLarge),
+                  Text(r'$1,170',
                       style: Theme.of(context)
                           .textTheme
                           .headlineSmall
@@ -1544,7 +1507,7 @@ class _SidebarWidgets extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(18),
           child: Text(
-            'Remember to download offline maps for the Eastfjords. Signal can be spotty between the mountain passes.',
+            'Keep offline maps handy for remote trails and viewpoints. Most cultural monuments offer audio guides on-site.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontStyle: FontStyle.italic, color: NavTripPalette.mutedInk),
           ),
@@ -1640,6 +1603,68 @@ class _SummaryChip extends StatelessWidget {
           Icon(icon, size: 16, color: NavTripPalette.terracotta),
           const SizedBox(width: 6),
           Text(label, style: Theme.of(context).textTheme.labelMedium),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileInfoRow extends StatelessWidget {
+  const _ProfileInfoRow({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 96,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: NavTripPalette.mutedInk,
+                ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.label, required this.icon});
+
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xffdec0b7)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: NavTripPalette.terracotta),
+          const SizedBox(width: 8),
+          Text(label, style: Theme.of(context).textTheme.labelLarge),
         ],
       ),
     );

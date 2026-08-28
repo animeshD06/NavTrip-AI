@@ -21,6 +21,11 @@ class TripPlannerController extends ChangeNotifier {
   String category = 'historical';
   String searchQuery = '';
   int days = 2;
+  String budgetTier = 'moderate';
+  String travelStyle = 'balanced';
+  int groupSize = 2;
+  List<String> interests = const ['historical', 'culture', 'scenic'];
+  DateTime? startDate;
 
   bool isLoading = false;
   bool isCheckingBackend = false;
@@ -132,6 +137,64 @@ class TripPlannerController extends ChangeNotifier {
     });
   }
 
+  Future<void> setTripPlan({
+    required String newDestination,
+    required int newDays,
+    required String newCategory,
+    String? newBudgetTier,
+    String? newTravelStyle,
+    int? newGroupSize,
+    List<String>? newInterests,
+    DateTime? newStartDate,
+    bool autoGenerate = true,
+  }) async {
+    destination = newDestination.trim().isEmpty ? 'Jaipur' : newDestination.trim();
+    days = newDays <= 0 ? 2 : newDays;
+    category = newCategory.isEmpty ? 'historical' : newCategory;
+    if (newBudgetTier != null) budgetTier = newBudgetTier;
+    if (newTravelStyle != null) travelStyle = newTravelStyle;
+    if (newGroupSize != null) groupSize = newGroupSize;
+    if (newInterests != null) interests = List.unmodifiable(newInterests);
+    if (newStartDate != null) startDate = newStartDate;
+
+    notifyListeners();
+
+    if (autoGenerate) {
+      await generateItinerary();
+    } else {
+      await loadPlaces();
+    }
+  }
+
+  Future<void> selectPresetDestination(
+    String newDestination, {
+    String? newCategory,
+    int? newDays,
+  }) async {
+    destination = newDestination.trim().isEmpty ? destination : newDestination.trim();
+    if (newCategory != null && newCategory.isNotEmpty) {
+      category = newCategory;
+    }
+    if (newDays != null && newDays > 0) {
+      days = newDays;
+    }
+    notifyListeners();
+    await generateItinerary();
+  }
+
+  Future<void> applyCachedTrip(CachedTrip cachedTrip) async {
+    destination = cachedTrip.destination;
+    category = cachedTrip.category;
+    days = cachedTrip.days;
+    itinerary = cachedTrip.itinerary;
+    offlineTripLoaded = true;
+    infoMessage = 'Loaded saved itinerary for $destination.';
+    notifyListeners();
+    if (backendConnected) {
+      await loadPlaces();
+    }
+  }
+
   void updateDestination(String value) {
     destination = value.trim().isEmpty ? 'Jaipur' : value.trim();
     notifyListeners();
@@ -149,6 +212,21 @@ class TripPlannerController extends ChangeNotifier {
 
   void updateDays(double value) {
     days = value.round();
+    notifyListeners();
+  }
+
+  void updateBudgetTier(String value) {
+    budgetTier = value;
+    notifyListeners();
+  }
+
+  void updateTravelStyle(String value) {
+    travelStyle = value;
+    notifyListeners();
+  }
+
+  void updateGroupSize(int value) {
+    groupSize = value;
     notifyListeners();
   }
 

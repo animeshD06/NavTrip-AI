@@ -109,18 +109,21 @@ class _TravelStackScrollerState extends State<TravelStackScroller> {
 
     final viewportHeight = MediaQuery.sizeOf(context).height;
     
-    final itemDistance = 380.0;
-    final itemStackDistance = 30.0;
-    final baseScale = 0.85;
-    final itemScale = 0.03;
-    final rotationAmount = -0.008;
-    final blurAmount = 1.0;
+    final itemDistance = 320.0;
+    final itemStackDistance = 14.0;
+    final baseScale = 0.94;
+    final itemScale = 0.018;
+    final rotationAmount = -0.005;
+    final blurAmount = 0.8;
     
-    // Position container at 5% of viewport to prevent top-clipping
-    final stickyTop = viewportHeight * 0.05;
+    // Card height occupies approx 48-52% of viewport for clean 50% coverage
+    final cardHeight = math.min(430.0, math.max(330.0, viewportHeight * 0.50));
+    
+    // Position container nicely in upper-middle viewport zone
+    final stickyTop = math.max(16.0, (viewportHeight - cardHeight) * 0.25);
 
     final travel = math.max(1.0, (widget.cards.length - 1) * itemDistance);
-    final sectionHeight = travel + viewportHeight * 0.65;
+    final sectionHeight = travel + cardHeight + 80.0;
 
     return SizedBox(
       key: _sectionKey,
@@ -137,8 +140,6 @@ class _TravelStackScrollerState extends State<TravelStackScroller> {
           
           final currentPosition = (clampedScrollOffset / itemDistance).clamp(0.0, widget.cards.length - 1.0);
 
-          final cardHeight = math.min(680.0, math.max(560.0, viewportHeight * 0.82));
-
           return Stack(
             clipBehavior: Clip.none,
             children: [
@@ -147,7 +148,7 @@ class _TravelStackScrollerState extends State<TravelStackScroller> {
                 left: 0,
                 right: 0,
                 child: SizedBox(
-                  height: cardHeight + stickyTop + 60,
+                  height: cardHeight + stickyTop + 40,
                   child: Stack(
                     clipBehavior: Clip.none,
                     alignment: Alignment.center,
@@ -310,32 +311,32 @@ class _StackCard extends StatelessWidget {
     final narrow = compact || width < 940;
     
     final card = SizedBox(
-      width: narrow ? null : 1160,
+      width: narrow ? null : 1080,
       child: Container(
         decoration: NavTripStyles.paperCard(context: context, radius: 14).copyWith(
           boxShadow: [
             BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, active ? 0.16 : 0.09),
-              blurRadius: active ? 30 : 18,
-              offset: Offset(0, active ? 18 : 10),
+              color: Color.fromRGBO(0, 0, 0, active ? 0.14 : 0.08),
+              blurRadius: active ? 24 : 14,
+              offset: Offset(0, active ? 12 : 8),
             ),
           ],
         ),
-        padding: EdgeInsets.all(compact ? 16 : 24),
+        padding: EdgeInsets.all(compact ? 16 : 20),
         child: narrow
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _CardCopy(data: data),
-                  SizedBox(height: compact ? 12 : 18),
-                  _CardImage(data: data, height: compact ? 240 : 320),
+                  SizedBox(height: compact ? 10 : 14),
+                  _CardImage(data: data, height: compact ? 220 : 260),
                 ],
               )
             : Row(
                 children: [
                   Expanded(flex: 11, child: _CardCopy(data: data, compact: true)),
-                  const SizedBox(width: 26),
-                  Expanded(flex: 9, child: _CardImage(data: data, height: 390)),
+                  const SizedBox(width: 24),
+                  Expanded(flex: 9, child: _CardImage(data: data, height: 260)),
                 ],
               ),
       ),
@@ -368,67 +369,72 @@ class _CardCopy extends StatelessWidget {
       children: [
         if (data.badge != null) ...[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
             decoration: BoxDecoration(
               color: NavTripPalette.terracotta,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(3),
             ),
             child: Text(
               data.badge!,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 11,
+                fontSize: 10.5,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
+                letterSpacing: 1.1,
               ),
             ),
           ),
-          SizedBox(height: compact ? 10 : 16),
+          SizedBox(height: compact ? 8 : 12),
         ],
         Text(
           data.title,
           style: Theme.of(context).textTheme.displayLarge?.copyWith(
                 color: NavTripPalette.terracottaDeep,
-                fontSize: width < 600 ? 36 : (compact ? 44 : 56),
-                height: 1,
+                fontSize: width < 600 ? 28 : (compact ? 34 : 40),
+                height: 1.08,
               ),
         ),
-        SizedBox(height: compact ? 10 : 14),
+        SizedBox(height: compact ? 6 : 10),
         Text(
           data.subtitle,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: NavTripPalette.mutedInk,
+                height: 1.35,
               ),
         ),
-        SizedBox(height: compact ? 12 : 18),
+        SizedBox(height: compact ? 8 : 12),
         Transform.rotate(
-          angle: -0.012,
+          angle: -0.01,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                padding: const EdgeInsets.fromLTRB(14, 16, 14, 10),
                 decoration: NavTripStyles.stickyNote(context: context),
                 child: Text(
                   data.quote,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: NavTripPalette.ink,
                         fontStyle: FontStyle.italic,
-                        fontSize: compact ? 16 : null,
-                        height: 1.28,
+                        fontSize: compact ? 13 : 14,
+                        height: 1.25,
                       ),
                 ),
               ),
               Positioned(
-                top: -10,
+                top: -8,
                 left: 0,
                 right: 0,
                 child: Center(
                   child: Transform.rotate(
                     angle: 0.03,
                     child: Container(
-                      width: 90,
-                      height: 20,
+                      width: 70,
+                      height: 16,
                       decoration: BoxDecoration(
                         color: const Color(0xddeee4d3),
                         boxShadow: [
@@ -454,14 +460,14 @@ class _CardCopy extends StatelessWidget {
           ),
         ),
         if (data.trailing != null) ...[
-          SizedBox(height: compact ? 10 : 16),
+          SizedBox(height: compact ? 8 : 12),
           data.trailing!,
         ],
         if (data.primaryLabel != null || data.secondaryLabel != null) ...[
-          SizedBox(height: compact ? 14 : 22),
+          SizedBox(height: compact ? 10 : 16),
           Wrap(
-            spacing: 12,
-            runSpacing: 12,
+            spacing: 10,
+            runSpacing: 8,
             children: [
               if (data.primaryLabel != null)
                 FilledButton(

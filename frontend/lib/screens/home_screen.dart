@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/navtrip_theme.dart';
 import '../widgets/home/editorial_scroll_story.dart';
 import '../widgets/home/sticky_trip_planner.dart';
+import '../widgets/home/trip_location_and_details_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -224,6 +225,9 @@ class _TopNav extends StatelessWidget {
                   TextButton(
                       onPressed: onExplore, child: const Text('Explore')),
                   TextButton(
+                      onPressed: () => TripLocationAndDetailsSheet.show(context),
+                      child: const Text('Plan Trip')),
+                  TextButton(
                       onPressed: onPlanner, child: const Text('Planner')),
                   TextButton(onPressed: onTrips, child: const Text('My Trips')),
                   FilledButton(
@@ -328,53 +332,60 @@ class _DestinationCardState extends State<_DestinationCard> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 200),
-        scale: _hovered ? 1.02 : 1,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              AnimatedScale(
-                duration: const Duration(milliseconds: 500),
-                scale: _hovered ? 1.08 : 1.0,
-                child: Image.network(widget.image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink()),
-              ),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.transparent, Color.fromRGBO(0, 0, 0, 0.62)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+      child: GestureDetector(
+        onTap: () => TripLocationAndDetailsSheet.show(
+          context,
+          initialDestination: widget.title,
+        ),
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 200),
+          scale: _hovered ? 1.02 : 1,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                AnimatedScale(
+                  duration: const Duration(milliseconds: 500),
+                  scale: _hovered ? 1.08 : 1.0,
+                  child: Image.network(widget.image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.transparent, Color.fromRGBO(0, 0, 0, 0.62)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(widget.country,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelLarge
-                            ?.copyWith(color: Colors.white70)),
-                    const SizedBox(height: 6),
-                    Text(widget.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(color: Colors.white)),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(widget.country,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(color: Colors.white70)),
+                      const SizedBox(height: 6),
+                      Text(widget.title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(color: Colors.white)),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
