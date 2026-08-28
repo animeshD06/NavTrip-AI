@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "db:schema": "node scripts/apply-schema.js",
+    "db:postgis": "node scripts/apply-postgis.js",
     "db:seed": "node scripts/seed.js",
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",

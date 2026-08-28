@@ -7,12 +7,30 @@ import '../models/app_user.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  AuthProvider() {
-    _authStateSubscription = _authService.authStateChanges.listen(_handleAuthStateChanged);
-    _handleAuthStateChanged(_authService.currentUser);
+  AuthProvider({bool enabled = true}) : _enabled = enabled {
+    if (!_enabled) {
+      _isReady = true;
+      _errorMessage = 'Firebase auth is not configured for this build.';
+      return;
+    }
+
+    _authService = AuthService();
+    _authStateSubscription =
+        _authService!.authStateChanges.listen(_handleAuthStateChanged);
+    _handleAuthStateChanged(_authService!.currentUser);
+
+    // Safety fallback: if auth state hasn't resolved after 10s, force ready
+    // so the app doesn't hang on an infinite loading spinner.
+    Future.delayed(const Duration(seconds: 10), () {
+      if (!_isReady) {
+        _isReady = true;
+        notifyListeners();
+      }
+    });
   }
 
-  final AuthService _authService = AuthService();
+  final bool _enabled;
+  AuthService? _authService;
   StreamSubscription<firebase_auth.User?>? _authStateSubscription;
 
   AppUser? _currentUser;
@@ -33,7 +51,12 @@ class AuthProvider extends ChangeNotifier {
     required String identifier,
     required String password,
   }) {
-    return _runAction(() => _authService.signIn(identifier: identifier, password: password));
+    return _runAction(
+      () => _requireAuthService().signIn(
+        identifier: identifier,
+        password: password,
+      ),
+    );
   }
 
   Future<void> signUp({
@@ -42,7 +65,7 @@ class AuthProvider extends ChangeNotifier {
     required String password,
     required String confirmPassword,
   }) {
-    return _runAction(() => _authService.signUp(
+    return _runAction(() => _requireAuthService().signUp(
           email: email,
           username: username,
           password: password,
@@ -51,21 +74,28 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signInWithGoogle() {
-    return _runAction(_authService.signInWithGoogle);
+    return _runAction(_requireAuthService().signInWithGoogle);
   }
 
   Future<void> signOut() {
-    return _runAction(_authService.signOut);
+    return _runAction(_requireAuthService().signOut);
   }
 
   Future<void> handleDeepLink(Uri uri) {
-    return _runAction(() => _authService.handleDeepLink(uri));
+    return _runAction(() => _requireAuthService().handleDeepLink(uri));
   }
 
   Future<void> restoreSession() async {
-    _syncFromUser(_authService.currentUser);
-    await _authService.restoreSession();
-    _syncFromUser(_authService.currentUser);
+    if (!_enabled) {
+      _isReady = true;
+      notifyListeners();
+      return;
+    }
+
+    final authService = _requireAuthService();
+    _syncFromUser(authService.currentUser);
+    await authService.restoreSession();
+    _syncFromUser(authService.currentUser);
   }
 
   void clearMessages() {
@@ -99,7 +129,7 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       await action();
-      _syncFromUser(_authService.currentUser);
+      _syncFromUser(_requireAuthService().currentUser);
     } on firebase_auth.FirebaseAuthException catch (error) {
       _errorMessage = _friendlyMessage(error);
       notifyListeners();
@@ -113,6 +143,10 @@ class AuthProvider extends ChangeNotifier {
   }
 
   String _friendlyMessage(Object error) {
+    if (error is StateError) {
+      return error.message;
+    }
+
     if (error is firebase_auth.FirebaseAuthException) {
       final code = error.code.toLowerCase();
       final message = (error.message ?? '').trim();
@@ -149,6 +183,15 @@ class AuthProvider extends ChangeNotifier {
     }
 
     return 'Authentication failed. Please try again.';
+  }
+
+  AuthService _requireAuthService() {
+    final authService = _authService;
+    if (_enabled && authService != null) {
+      return authService;
+    }
+
+    throw StateError('Firebase auth is not configured for this build.');
   }
 
   @override

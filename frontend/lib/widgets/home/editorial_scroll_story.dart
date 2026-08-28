@@ -68,7 +68,7 @@ class _EditorialScrollStoryState extends State<EditorialScrollStory> {
     if (mobile) {
       return Container(
         key: _key,
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         child: Column(
           children: [
             SizedBox(
@@ -725,15 +725,36 @@ class _ProofStack extends StatelessWidget {
         horizontal: mobile ? 20 : 72,
         vertical: mobile ? 52 : 56,
       ),
-      child: Column(
-        children: [
-          for (var i = 0; i < _cards.length; i++)
-            Transform.translate(
-              offset: Offset(0, mobile ? 0 : i * -18.0),
-              child: _ProofCard(data: _cards[i]),
+      child: mobile
+          ? Column(
+              children: [
+                for (final card in _cards) _ProofCard(data: card),
+              ],
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                return SizedBox(
+                  height: constraints.maxHeight,
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < _cards.length; i++)
+                        Expanded(
+                          child: Transform.translate(
+                            offset: Offset(0, i * -10.0),
+                            child: _ProofCard(
+                              data: _cards[i],
+                              compact: true,
+                              margin: EdgeInsets.only(
+                                bottom: i == _cards.length - 1 ? 0 : 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
-        ],
-      ),
     );
   }
 }
@@ -757,17 +778,24 @@ class _ProofData {
 }
 
 class _ProofCard extends StatelessWidget {
-  const _ProofCard({required this.data});
+  const _ProofCard({
+    required this.data,
+    this.compact = false,
+    this.margin = const EdgeInsets.only(bottom: 18),
+  });
 
   final _ProofData data;
+  final bool compact;
+  final EdgeInsetsGeometry margin;
 
   @override
   Widget build(BuildContext context) {
     final mobile = MediaQuery.sizeOf(context).width < 760;
+    final compactDesktop = compact && !mobile;
     return Container(
       constraints: const BoxConstraints(maxWidth: 1080),
-      margin: const EdgeInsets.only(bottom: 18),
-      padding: EdgeInsets.all(mobile ? 18 : 28),
+      margin: margin,
+      padding: EdgeInsets.all(mobile ? 18 : (compactDesktop ? 18 : 28)),
       decoration: BoxDecoration(
         color: data.color,
         borderRadius: BorderRadius.circular(10),
@@ -783,39 +811,52 @@ class _ProofCard extends StatelessWidget {
                   flex: 7,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _proofChildren(context, mobile),
+                    children: _proofChildren(context, mobile, compactDesktop),
                   ),
                 ),
-                const SizedBox(width: 34),
-                Expanded(
-                  flex: 3,
-                  child: _ProofImage(data: data),
-                ),
+                SizedBox(width: compactDesktop ? 20 : 34),
+                if (compactDesktop)
+                  SizedBox(
+                    width: 112,
+                    height: 136,
+                    child: _ProofImage(data: data),
+                  )
+                else
+                  Expanded(
+                    flex: 3,
+                    child: _ProofImage(data: data),
+                  ),
               ],
             ),
     );
   }
 
-  List<Widget> _proofChildren(BuildContext context, bool mobile) {
+  List<Widget> _proofChildren(
+    BuildContext context,
+    bool mobile, [
+    bool compact = false,
+  ]) {
     return [
       Text(
         '"',
         style: Theme.of(context).textTheme.displayLarge?.copyWith(
               color: data.foreground,
-              fontSize: mobile ? 32 : 46,
+              fontSize: mobile ? 32 : (compact ? 24 : 46),
               letterSpacing: 0,
             ),
       ),
       Text(
         data.quote,
+        maxLines: compact ? 2 : null,
+        overflow: compact ? TextOverflow.ellipsis : TextOverflow.visible,
         style: Theme.of(context).textTheme.displayLarge?.copyWith(
               color: data.foreground,
-              fontSize: mobile ? 34 : 54,
-              height: 1.04,
+              fontSize: mobile ? 34 : (compact ? 28 : 54),
+              height: compact ? 1.08 : 1.04,
               letterSpacing: 0,
             ),
       ),
-      SizedBox(height: mobile ? 28 : 56),
+      SizedBox(height: mobile ? 28 : (compact ? 14 : 56)),
       Row(
         children: [
           if (mobile) ...[

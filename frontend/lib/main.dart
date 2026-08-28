@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -36,6 +38,7 @@ class NavTripApp extends StatefulWidget {
 class _NavTripAppState extends State<NavTripApp> {
   late final Future<void> _bootstrapFuture = _bootstrap();
   late final String _initialRoute = _resolveInitialRoute();
+  bool _firebaseEnabled = false;
 
   String _resolveInitialRoute() {
     final path = Uri.base.path.trim();
@@ -46,12 +49,20 @@ class _NavTripAppState extends State<NavTripApp> {
   }
 
   Future<void> _bootstrap() async {
-    await FirebaseConfig.load();
-    if (!FirebaseConfig.hasConfig) {
-      throw StateError(
-          'Firebase config is missing. Add FIREBASE_* values to frontend/.env.');
+    try {
+      await FirebaseConfig.load();
+      _firebaseEnabled = FirebaseConfig.hasConfig;
+      if (!_firebaseEnabled) {
+        return;
+      }
+
+      await Firebase.initializeApp(options: FirebaseConfig.options)
+          .timeout(const Duration(seconds: 30));
+    } on TimeoutException {
+      _firebaseEnabled = false;
+    } catch (_) {
+      _firebaseEnabled = false;
     }
-    await Firebase.initializeApp(options: FirebaseConfig.options);
   }
 
   Map<String, WidgetBuilder> _bootstrapRoutes(WidgetBuilder fallbackBuilder) {
@@ -75,6 +86,8 @@ class _NavTripAppState extends State<NavTripApp> {
             title: 'NavTrip AI',
             debugShowCheckedModeBanner: false,
             theme: NavTripStyles.theme(),
+            darkTheme: NavTripStyles.darkTheme(),
+            themeMode: ThemeMode.system,
             routes: _bootstrapRoutes((_) => const _BootstrapLoadingScreen()),
             initialRoute: _initialRoute,
           );
@@ -92,6 +105,8 @@ class _NavTripAppState extends State<NavTripApp> {
             title: 'NavTrip AI',
             debugShowCheckedModeBanner: false,
             theme: NavTripStyles.theme(),
+            darkTheme: NavTripStyles.darkTheme(),
+            themeMode: ThemeMode.system,
             routes: _bootstrapRoutes((_) => failureScreen),
             initialRoute: _initialRoute,
           );
@@ -100,7 +115,7 @@ class _NavTripAppState extends State<NavTripApp> {
         return MultiProvider(
           providers: [
             ChangeNotifierProvider<AuthProvider>(
-              create: (_) => AuthProvider(),
+              create: (_) => AuthProvider(enabled: _firebaseEnabled),
             ),
             Provider<ApiClient>(
               create: (_) => ApiClient(),
@@ -146,6 +161,8 @@ class _NavTripAppShell extends StatelessWidget {
       title: 'NavTrip AI',
       debugShowCheckedModeBanner: false,
       theme: NavTripStyles.theme(),
+      darkTheme: NavTripStyles.darkTheme(),
+      themeMode: ThemeMode.system,
       initialRoute: initialRoute,
       routes: {
         '/': (_) => _HomeRouteGate(loadPlacesOnStart: loadPlacesOnStart),

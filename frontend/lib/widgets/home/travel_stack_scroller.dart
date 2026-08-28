@@ -312,7 +312,7 @@ class _StackCard extends StatelessWidget {
     final card = SizedBox(
       width: narrow ? null : 1160,
       child: Container(
-        decoration: NavTripStyles.paperCard(radius: 14).copyWith(
+        decoration: NavTripStyles.paperCard(context: context, radius: 14).copyWith(
           boxShadow: [
             BoxShadow(
               color: Color.fromRGBO(0, 0, 0, active ? 0.16 : 0.09),
@@ -408,7 +408,7 @@ class _CardCopy extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                decoration: NavTripStyles.stickyNote(),
+                decoration: NavTripStyles.stickyNote(context: context),
                 child: Text(
                   data.quote,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -433,14 +433,15 @@ class _CardCopy extends StatelessWidget {
                         color: const Color(0xddeee4d3),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 2,
                             offset: const Offset(0, 1),
                           ),
                         ],
                         border: Border.symmetric(
                           vertical: BorderSide(
-                            color: const Color(0xffdec0b7).withOpacity(0.3),
+                            color:
+                                const Color(0xffdec0b7).withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -498,7 +499,7 @@ class _CardImage extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: [
           Container(
-            decoration: NavTripStyles.polaroidCard(),
+            decoration: NavTripStyles.polaroidCard(context: context),
             padding: const EdgeInsets.all(12),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(2),
@@ -560,7 +561,7 @@ class _PushPin extends StatelessWidget {
               child: Container(
                 width: 2,
                 height: 12,
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
               ),
             ),
           ),
@@ -579,7 +580,7 @@ class _PushPin extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.35),
+                  color: Colors.black.withValues(alpha: 0.35),
                   blurRadius: 3,
                   offset: const Offset(3, 4),
                 ),
@@ -636,7 +637,8 @@ class _ProgressIndicatorDots extends StatelessWidget {
             boxShadow: activeRatio > 0.5
                 ? [
                     BoxShadow(
-                      color: NavTripPalette.terracotta.withOpacity(0.15),
+                      color:
+                          NavTripPalette.terracotta.withValues(alpha: 0.15),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

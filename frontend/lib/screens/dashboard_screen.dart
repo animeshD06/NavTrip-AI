@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/tourist_place.dart';
@@ -68,6 +68,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onSignIn: () => Navigator.of(context).pushNamed('/login'),
                     onProfile: () => _showProfileMenu(context, auth),
                   ),
+                  if (controller.isLoading ||
+                      controller.errorMessage != null ||
+                      controller.infoMessage != null) ...[
+                    const SizedBox(height: 14),
+                    _PlannerStatusBanner(controller: controller),
+                  ],
                   const SizedBox(height: 28),
                   TravelStackScroller(
                     scrollController: _scrollController,
@@ -93,6 +99,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         SizedBox(
                             width: 340,
                             child: _TimelineAndMapSection(
+                                controller: controller,
                                 onOpenTrip: () => Navigator.of(context)
                                     .pushNamed('/trip-details'),
                                 onOpenMap: () => Navigator.of(context)
@@ -108,6 +115,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     TouristMapScreen(initialPlace: place)))),
                     const SizedBox(height: 24),
                     _TimelineAndMapSection(
+                        controller: controller,
                         onOpenTrip: () =>
                             Navigator.of(context).pushNamed('/trip-details'),
                         onOpenMap: () =>
@@ -315,6 +323,7 @@ class _TopBar extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _WelcomeHeader extends StatelessWidget {
   const _WelcomeHeader({
     required this.destination,
@@ -436,6 +445,7 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _SpotlightCard extends StatelessWidget {
   const _SpotlightCard({
     required this.onViewItinerary,
@@ -449,7 +459,7 @@ class _SpotlightCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: NavTripStyles.paperCard(radius: 12),
+      decoration: NavTripStyles.paperCard(context: context, radius: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -505,7 +515,7 @@ class _SpotlightCard extends StatelessWidget {
             child: Transform.rotate(
               angle: 0.03,
               child: Container(
-                decoration: NavTripStyles.polaroidCard(),
+                decoration: NavTripStyles.polaroidCard(context: context),
                 padding: const EdgeInsets.all(12),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(2),
@@ -566,7 +576,7 @@ class _PinboardSection extends StatelessWidget {
                   'https://lh3.googleusercontent.com/aida-public/AB6AXuC9NmwaW7BBkFcjJs8MRalpoUSctS9aLxf9A3z0nKoReBW6owD2T57Cr4fukvl-Z90Rsm-ZMfmo46uAcPrscRM4-rPZKH0OSOC-sArA8lzEjrMl2-jh0o6EL9mRwDpPMiO6gQDNPSzQRfSAEmXc8KFOx6f5SJ62PPPgaBc3u4dxLVgMLFG6BGrN0d20ep7a_yOg95k3mWJ1ZWmWzDl5A-yBvoOK3JUXOy2DT4jEXQ4hZijrYtT55DvpdiQRyt39fUuW2UodoJOrc1-f',
               date: 'OCT 12',
               title: 'Roman Escapade',
-              subtitle: 'Italy ï¿½ 5 Days',
+              subtitle: 'Italy • 5 Days',
               footer: '32 PINNED SPOTS',
               onTap: () => Navigator.of(context).pushNamed('/trip-details'),
             ),
@@ -575,7 +585,7 @@ class _PinboardSection extends StatelessWidget {
                   'https://lh3.googleusercontent.com/aida-public/AB6AXuCjHVtVcf5pUDBcddizpfb9nfeINpnEgWtrq-HMvA2aD9ilQLk2IsmkcNVpoR08XvpsdVQ93Zl5SEY9fqqK8VToD0RZEBQu97rr12Efx8ZdeWll2Vq24cjhYhBJDSDi_9pZf-mpsPv22b-kppUQxidiU5nagOOC6v9lpSQMTa4qO0hjEKR929OAY4m4sn-IstAgDZsEZNlA8E2lE5w_5Ca53MUkcXnfWSnQG-P6s1C1B-LJkpGCp5W88q52MSVtroABrxBuVBSNr1Ie',
               date: 'NOV 04',
               title: 'Kyoto Serenity',
-              subtitle: 'Japan ï¿½ 12 Days',
+              subtitle: 'Japan • 12 Days',
               footer: '14 PINNED SPOTS',
               onTap: () => onOpenMap(places.first),
             ),
@@ -586,7 +596,7 @@ class _PinboardSection extends StatelessWidget {
                   'https://lh3.googleusercontent.com/aida-public/AB6AXuDqSr-jDZ3s6sJ4MHVblLt9e-M5iEWpK60asKVE_30veuVDeQXEIT3nErCK9WawEgngsA5OrM20FTWtwaDk8xx4gVQb_XnB7HB05-_JRuPaNkZpO-t4WtFNdg5Z5_zmJe7B4A3ifbPN_yRgUEVOJdZtc_mDW1aJ-M5F5SgVuBrQ7n6NpdtnQnkuHEmZxBTmmNTlGwwA1hsMlh7c48gIJjKt1F6GUNqjKMhW6_SR3vr9-rzm1P0TqzG10OxZLr_g7-mVRSPtcy-ecQWH',
               date: 'APR 27',
               title: 'Iceland Ring Road',
-              subtitle: 'Iceland ï¿½ 10 Days',
+              subtitle: 'Iceland • 10 Days',
               footer: '9 PINNED SPOTS',
               onTap: () => Navigator.of(context).pushNamed('/trip-map'),
             ),
@@ -776,10 +786,12 @@ class _UnderlineNote extends StatelessWidget {
 
 class _TimelineAndMapSection extends StatelessWidget {
   const _TimelineAndMapSection({
+    required this.controller,
     required this.onOpenTrip,
     required this.onOpenMap,
   });
 
+  final TripPlannerController controller;
   final VoidCallback onOpenTrip;
   final VoidCallback onOpenMap;
 
@@ -788,7 +800,7 @@ class _TimelineAndMapSection extends StatelessWidget {
     return Column(
       children: [
         Container(
-          decoration: NavTripStyles.paperCard(radius: 14),
+          decoration: NavTripStyles.paperCard(context: context, radius: 14),
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -799,6 +811,13 @@ class _TimelineAndMapSection extends StatelessWidget {
                       .headlineMedium
                       ?.copyWith(color: NavTripPalette.terracottaDeep)),
               const SizedBox(height: 20),
+              _ActivityLine(
+                  time: 'LOCAL CACHE',
+                  title: '${controller.cachedTrips.length} saved offline ${controller.cachedTrips.length == 1 ? 'trip' : 'trips'}',
+                  body: controller.offlineTripLoaded
+                      ? 'The latest cached itinerary is active because the backend is unavailable.'
+                      : 'Generated itineraries are saved locally after each successful plan.'),
+              const SizedBox(height: 8),
               _ActivityLine(
                   time: '2 HOURS AGO',
                   title: 'Added Old Quay Inn to Scotland Trip',
@@ -826,7 +845,7 @@ class _TimelineAndMapSection extends StatelessWidget {
         const SizedBox(height: 20),
         Container(
           height: 410,
-          decoration: NavTripStyles.paperCard(radius: 14),
+          decoration: NavTripStyles.paperCard(context: context, radius: 14),
           child: Stack(
             children: [
               Positioned.fill(
@@ -995,6 +1014,65 @@ class _ActivityLine extends StatelessWidget {
   }
 }
 
+class _PlannerStatusBanner extends StatelessWidget {
+  const _PlannerStatusBanner({required this.controller});
+
+  final TripPlannerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final isError = controller.errorMessage != null;
+    final message = controller.isLoading
+        ? 'Working on your trip...'
+        : controller.errorMessage ?? controller.infoMessage ?? '';
+    final icon = controller.isLoading
+        ? Icons.hourglass_top
+        : isError
+            ? Icons.error_outline
+            : Icons.offline_pin_outlined;
+    final color = isError
+        ? Theme.of(context).colorScheme.errorContainer
+        : Theme.of(context).colorScheme.secondaryContainer;
+    final foreground = isError
+        ? Theme.of(context).colorScheme.onErrorContainer
+        : Theme.of(context).colorScheme.onSecondaryContainer;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          if (controller.isLoading)
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: foreground,
+              ),
+            )
+          else
+            Icon(icon, color: foreground),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: foreground),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class ItineraryScreen extends StatefulWidget {
   const ItineraryScreen({super.key});
 
@@ -1095,7 +1173,7 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
           constraints: const BoxConstraints(maxWidth: 520),
           child: Container(
             padding: const EdgeInsets.all(24),
-            decoration: NavTripStyles.paperCard(radius: 14),
+            decoration: NavTripStyles.paperCard(context: context, radius: 14),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1188,7 +1266,7 @@ class _HeroBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: NavTripStyles.paperCard(radius: 12),
+      decoration: NavTripStyles.paperCard(context: context, radius: 12),
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
@@ -1231,7 +1309,7 @@ class _HeroBanner extends StatelessWidget {
             child: Transform.rotate(
               angle: 0.03,
               child: Container(
-                decoration: NavTripStyles.polaroidCard(),
+                decoration: NavTripStyles.polaroidCard(context: context),
                 padding: const EdgeInsets.all(10),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(2),
@@ -1263,7 +1341,7 @@ class _TimelineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: NavTripStyles.paperCard(radius: 14),
+      decoration: NavTripStyles.paperCard(context: context, radius: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1393,7 +1471,7 @@ class _SidebarWidgets extends StatelessWidget {
       children: [
         Container(
           width: double.infinity,
-          decoration: NavTripStyles.stickyNote(),
+          decoration: NavTripStyles.stickyNote(context: context),
           padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1421,7 +1499,7 @@ class _SidebarWidgets extends StatelessWidget {
         const SizedBox(height: 18),
         Container(
           width: double.infinity,
-          decoration: NavTripStyles.paperCard(radius: 14),
+          decoration: NavTripStyles.paperCard(context: context, radius: 14),
           padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

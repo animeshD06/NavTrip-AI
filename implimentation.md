@@ -223,11 +223,11 @@ Tasks:
 
 - [x] Add voice service
 - [x] Narrate marker details on tap
-- [ ] Narrate nearby place automatically
-- [ ] Add distance trigger threshold
-- [ ] Add cooldown to prevent repeated narration
-- [ ] Add speech settings
-- [ ] Add language support
+- [x] Narrate nearby place automatically
+- [x] Add distance trigger threshold
+- [x] Add cooldown to prevent repeated narration
+- [x] Add speech settings
+- [x] Add language support
 
 Deliverable:
 
@@ -239,12 +239,12 @@ Goal: allow users to reload itineraries.
 
 Tasks:
 
-- [ ] Save generated trips in backend
-- [ ] Save itinerary places and order
+- [x] Save generated trips in backend
+- [x] Save itinerary places and order
 - [ ] Add Saved Trips screen
-- [ ] Add Trip Detail screen
-- [ ] Add delete trip action
-- [ ] Optionally cache trips locally with Hive/shared_preferences
+- [x] Add Trip Detail screen
+- [x] Add delete trip action
+- [x] Optionally cache trips locally with Hive/shared_preferences
 
 Deliverable:
 
@@ -256,13 +256,13 @@ Goal: add Gemini-powered suggestions after the core map system works.
 
 Tasks:
 
-- [ ] Add Gemini API key to backend env
-- [ ] Add AI service module
-- [ ] Add prompt templates
-- [ ] Generate itinerary suggestions
-- [ ] Match AI suggestions against real database places
-- [ ] Validate AI output before saving
-- [ ] Generate concise narration summaries
+- [x] Add Gemini API key to backend env
+- [x] Add AI service module
+- [x] Add prompt templates
+- [x] Generate itinerary suggestions
+- [x] Match AI suggestions against real database places
+- [x] Validate AI output before saving
+- [x] Generate concise narration summaries
 
 Important rule:
 
@@ -278,16 +278,16 @@ Goal: prepare the app for real users.
 
 Tasks:
 
-- [ ] Add marker clustering
-- [ ] Add offline saved trips
-- [ ] Add loading and error states
-- [ ] Add dark mode
-- [ ] Add JWT authentication
-- [ ] Add database indexes
-- [ ] Add PostGIS indexes
-- [ ] Add backend validation
-- [ ] Add rate limiting
-- [ ] Add deployment config
+- [x] Add marker clustering
+- [x] Add offline saved trips
+- [x] Add loading and error states
+- [x] Add dark mode
+- [x] Add JWT authentication
+- [x] Add database indexes
+- [x] Add PostGIS indexes
+- [x] Add backend validation
+- [x] Add rate limiting
+- [x] Add deployment config
 
 Deployment targets:
 
@@ -350,11 +350,11 @@ Target deliverables:
 - [x] Health endpoint working
 - [x] Database connection working
 - [x] Tourist places API working
-- [ ] Flutter app running in browser
-- [ ] OpenStreetMap visible in browser
-- [ ] User location visible after Flutter SDK installation and device permission
-- [ ] Tourist markers loaded from backend
-- [ ] Marker detail UI working
+- [x] Flutter app running in browser
+- [x] OpenStreetMap visible in browser
+- [x] User location visible after Flutter SDK installation and device permission
+- [x] Tourist markers loaded from backend
+- [x] Marker detail UI working
 
 ## Local Tooling Notes
 

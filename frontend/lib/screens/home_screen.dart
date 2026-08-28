@@ -188,9 +188,9 @@ class _TopNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xfff9f9f8),
-        boxShadow: [
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: const [
           BoxShadow(
             color: Color.fromRGBO(0, 0, 0, 0.05),
             blurRadius: 8,
@@ -413,8 +413,13 @@ class _Footer extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 28),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xffdec0b7), width: 1)),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
       ),
       child: mobile
           ? Column(

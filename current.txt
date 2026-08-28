@@ -1,0 +1,30 @@
+Current task: Frontend slow/stuck startup and Docker frontend build fixed.
+
+Plan:
+1. Confirm the exact failure mode from Docker/local Flutter output.
+2. Align Docker's Flutter builder with the local Flutter SDK version.
+3. Clean stale Flutter build metadata that points to the temporary N: drive.
+4. Re-run Flutter dependency resolution and web build checks.
+5. Validate Docker Compose config and, if practical, rebuild the frontend image.
+6. Update startup/docs if any command or port detail changed.
+
+Findings so far:
+- Docker frontend build failed because the old Flutter 3.24.5 image does not support APIs used by the app, including Color.withValues and CardThemeData.
+- The frontend Dockerfile has been updated to Flutter 3.44.0 to match the local SDK.
+- Stale Flutter metadata pointed at N:/tools/flutter from run_frontend.ps1; flutter clean and pub get regenerated it.
+- Docker frontend serves an empty Firebase .env asset by default, which previously blocked app startup.
+
+Completed:
+- Local Flutter web build passes with Flutter 3.44.0.
+- Firebase startup is now optional; public app startup no longer fails when Docker Firebase values are blank.
+- AuthProvider now has a disabled mode for builds without Firebase config.
+
+Final result:
+- Docker frontend image rebuilt successfully.
+- Docker frontend container restarted successfully on http://localhost:8002.
+- Frontend HTTP smoke checks pass for /, /main.dart.js, /flutter_bootstrap.js, and /assets/.env.
+- Backend health check passes at http://localhost:4000/api/health with database connected.
+- Flutter widget tests pass.
+
+Remaining note:
+- Full flutter analyze still reports unresolved tourist_map_screen imports, but targeted analysis of that file passes and release web builds pass. Treat this as an analyzer/IDE cache issue unless it reappears during builds.

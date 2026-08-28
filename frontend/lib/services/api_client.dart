@@ -9,8 +9,8 @@ class ApiClient {
       : _dio = Dio(
           BaseOptions(
             baseUrl: ApiConfig.baseUrl,
-            connectTimeout: const Duration(seconds: 8),
-            receiveTimeout: const Duration(seconds: 8),
+            connectTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
           ),
         );
 
@@ -58,6 +58,24 @@ class ApiClient {
     );
 
     return Itinerary.fromJson(response.data?['data'] as Map<String, dynamic>);
+  }
+
+  Future<Itinerary> createTrip({
+    required String destination,
+    required int days,
+    required String category,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/trips',
+      data: {
+        'destination': destination,
+        'days': days,
+        'category': category,
+      },
+    );
+
+    final data = response.data?['data'] as Map<String, dynamic>? ?? {};
+    return Itinerary.fromJson(data['itinerary'] as Map<String, dynamic>);
   }
 
   Future<Map<String, dynamic>> fetchNarration({

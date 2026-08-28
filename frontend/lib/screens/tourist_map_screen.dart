@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -91,6 +91,9 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
                               routePoints: routePoints,
                               currentLocation: _currentLocation,
                               selectedPlace: _selectedPlace,
+                              isLoading: controller.isLoading,
+                              statusMessage: controller.errorMessage ??
+                                  controller.infoMessage,
                               onSelectPlace: _selectPlace,
                             ),
                           ),
@@ -119,6 +122,9 @@ class _TouristMapScreenState extends State<TouristMapScreen> {
                               routePoints: routePoints,
                               currentLocation: _currentLocation,
                               selectedPlace: _selectedPlace,
+                              isLoading: controller.isLoading,
+                              statusMessage: controller.errorMessage ??
+                                  controller.infoMessage,
                               onSelectPlace: _selectPlace,
                             ),
                           ),
@@ -335,6 +341,8 @@ class _MapCanvas extends StatelessWidget {
     required this.routePoints,
     required this.currentLocation,
     required this.selectedPlace,
+    required this.isLoading,
+    required this.statusMessage,
     required this.onSelectPlace,
   });
 
@@ -344,10 +352,13 @@ class _MapCanvas extends StatelessWidget {
   final List<LatLng> routePoints;
   final LatLng? currentLocation;
   final TouristPlace? selectedPlace;
+  final bool isLoading;
+  final String? statusMessage;
   final ValueChanged<TouristPlace> onSelectPlace;
 
   @override
   Widget build(BuildContext context) {
+    final placeClusters = _clusterPlaces(places, selectedPlace);
     return Stack(
       children: [
         Padding(
@@ -381,19 +392,22 @@ class _MapCanvas extends StatelessWidget {
                         height: 44,
                         child: const Icon(Icons.navigation, color: Color(0xff2563eb), size: 34),
                       ),
-                    for (final place in places)
+                    for (final cluster in placeClusters)
                       Marker(
-                        point: LatLng(place.latitude, place.longitude),
-                        width: 52,
-                        height: 52,
-                        child: IconButton.filled(
-                          onPressed: () => onSelectPlace(place),
-                          style: IconButton.styleFrom(
-                            backgroundColor: place.id == selectedPlace?.id ? NavTripPalette.terracotta : NavTripPalette.terracottaSoft,
-                            foregroundColor: place.id == selectedPlace?.id ? Colors.white : NavTripPalette.terracottaDeep,
-                          ),
-                          icon: const Icon(Icons.place),
-                        ),
+                        point: cluster.center,
+                        width: cluster.isCluster ? 62 : 52,
+                        height: cluster.isCluster ? 62 : 52,
+                        child: cluster.isCluster
+                            ? _ClusterMarker(
+                                count: cluster.places.length,
+                                onTap: () => _zoomToCluster(cluster),
+                              )
+                            : _PlaceMarker(
+                                place: cluster.places.first,
+                                selected: cluster.places.first.id ==
+                                    selectedPlace?.id,
+                                onTap: () => onSelectPlace(cluster.places.first),
+                              ),
                       ),
                   ],
                 ),
@@ -406,9 +420,9 @@ class _MapCanvas extends StatelessWidget {
           top: 34,
           child: Column(
             children: [
-              _MapButton(icon: Icons.add),
+              _MapButton(icon: Icons.add, onPressed: () => _changeZoom(1)),
               const SizedBox(height: 8),
-              _MapButton(icon: Icons.remove),
+              _MapButton(icon: Icons.remove, onPressed: () => _changeZoom(-1)),
             ],
           ),
         ),
@@ -424,6 +438,18 @@ class _MapCanvas extends StatelessWidget {
               onDetails: (place) => _showPlaceDetailsFromContext(context, place),
             ),
           ),
+        if (isLoading || statusMessage != null || places.isEmpty)
+          Positioned(
+            left: 34,
+            top: 34,
+            child: _MapStatusPill(
+              isLoading: isLoading,
+              message: isLoading
+                  ? 'Loading map data...'
+                  : statusMessage ??
+                      'No places loaded yet. Check filters or reconnect.',
+            ),
+          ),
       ],
     );
   }
@@ -436,6 +462,190 @@ class _MapCanvas extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         child: Text(place.name),
       ),
+    );
+  }
+
+  List<_PlaceCluster> _clusterPlaces(
+    List<TouristPlace> places,
+    TouristPlace? selectedPlace,
+  ) {
+    const gridSize = 0.018;
+    final selectedId = selectedPlace?.id;
+    final groupedPlaces = <String, List<TouristPlace>>{};
+    final clusters = <_PlaceCluster>[];
+
+    for (final place in places) {
+      if (place.id == selectedId) {
+        clusters.add(_PlaceCluster.single(place));
+        continue;
+      }
+
+      final latBucket = (place.latitude / gridSize).round();
+      final lngBucket = (place.longitude / gridSize).round();
+      final key = '$latBucket:$lngBucket';
+      groupedPlaces.putIfAbsent(key, () => []).add(place);
+    }
+
+    for (final group in groupedPlaces.values) {
+      clusters.add(_PlaceCluster(group));
+    }
+
+    return clusters;
+  }
+
+  void _zoomToCluster(_PlaceCluster cluster) {
+    final camera = mapController.camera;
+    mapController.move(cluster.center, (camera.zoom + 2).clamp(3, 18));
+  }
+
+  void _changeZoom(double delta) {
+    final camera = mapController.camera;
+    mapController.move(camera.center, (camera.zoom + delta).clamp(3, 18));
+  }
+}
+
+class _MapStatusPill extends StatelessWidget {
+  const _MapStatusPill({
+    required this.isLoading,
+    required this.message,
+  });
+
+  final bool isLoading;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 340),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.12),
+            blurRadius: 14,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isLoading)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            Icon(
+              Icons.info_outline,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              message,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlaceCluster {
+  _PlaceCluster(this.places)
+      : center = LatLng(
+          places.map((place) => place.latitude).reduce((a, b) => a + b) /
+              places.length,
+          places.map((place) => place.longitude).reduce((a, b) => a + b) /
+              places.length,
+        );
+
+  _PlaceCluster.single(TouristPlace place)
+      : places = [place],
+        center = LatLng(place.latitude, place.longitude);
+
+  final List<TouristPlace> places;
+  final LatLng center;
+
+  bool get isCluster => places.length > 1;
+}
+
+class _ClusterMarker extends StatelessWidget {
+  const _ClusterMarker({
+    required this.count,
+    required this.onTap,
+  });
+
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkResponse(
+        onTap: onTap,
+        radius: 30,
+        child: Container(
+          decoration: BoxDecoration(
+            color: NavTripPalette.terracottaDeep,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 3),
+            boxShadow: const [
+              BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.24),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              '$count',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlaceMarker extends StatelessWidget {
+  const _PlaceMarker({
+    required this.place,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final TouristPlace place;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton.filled(
+      tooltip: place.name,
+      onPressed: onTap,
+      style: IconButton.styleFrom(
+        backgroundColor:
+            selected ? NavTripPalette.terracotta : NavTripPalette.terracottaSoft,
+        foregroundColor:
+            selected ? Colors.white : NavTripPalette.terracottaDeep,
+      ),
+      icon: const Icon(Icons.place),
     );
   }
 }
@@ -683,15 +893,19 @@ class _DestinationStrip extends StatelessWidget {
 }
 
 class _MapButton extends StatelessWidget {
-  const _MapButton({required this.icon});
+  const _MapButton({required this.icon, required this.onPressed});
 
   final IconData icon;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-      child: IconButton(onPressed: () {}, icon: Icon(icon, color: NavTripPalette.terracotta)),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, color: NavTripPalette.terracotta),
+      ),
     );
   }
 }
