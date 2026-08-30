@@ -1,11 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FirebaseConfig {
   FirebaseConfig._();
 
   static Future<void> load() async {
+    debugPrint('[STARTUP] FirebaseConfig: loading .env...');
     await dotenv.load(fileName: '.env');
+    debugPrint('[STARTUP] FirebaseConfig: .env loaded '
+        '(${dotenv.env.length} entries)');
   }
 
   static bool get hasConfig {

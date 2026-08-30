@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:provider/provider.dart';
@@ -49,18 +50,78 @@ class _NavTripAppState extends State<NavTripApp> {
   }
 
   Future<void> _bootstrap() async {
-    try {
-      await FirebaseConfig.load();
-      _firebaseEnabled = FirebaseConfig.hasConfig;
-      if (!_firebaseEnabled) {
-        return;
-      }
+    final stopwatch = Stopwatch()..start();
+    debugPrint('[STARTUP] Bootstrap started');
 
-      await Firebase.initializeApp(options: FirebaseConfig.options)
-          .timeout(const Duration(seconds: 30));
+    try {
+      // Wrap the entire bootstrap in a global timeout so no combination
+      // of slow steps can keep the user waiting longer than 6 seconds.
+      await _bootstrapCore().timeout(const Duration(seconds: 6));
     } on TimeoutException {
+      debugPrint('[STARTUP] Global bootstrap timeout reached after '
+          '${stopwatch.elapsedMilliseconds}ms — proceeding without Firebase');
       _firebaseEnabled = false;
-    } catch (_) {
+    } catch (error) {
+      debugPrint('[STARTUP] Bootstrap failed: $error');
+      _firebaseEnabled = false;
+    }
+
+    debugPrint('[STARTUP] Bootstrap finished in '
+        '${stopwatch.elapsedMilliseconds}ms — '
+        'firebaseEnabled=$_firebaseEnabled');
+  }
+
+  /// Inner bootstrap logic — called by [_bootstrap] which wraps it
+  /// in a global timeout.
+  Future<void> _bootstrapCore() async {
+    // Step 1: Load .env config (non-fatal on all platforms).
+    try {
+      debugPrint('[STARTUP] Loading .env config...');
+      await FirebaseConfig.load();
+      debugPrint('[STARTUP] .env config loaded');
+    } catch (error) {
+      debugPrint('[STARTUP] .env config failed: $error');
+      if (kIsWeb) {
+        // On web the .env is the only source of Firebase config — rethrow
+        // so the FutureBuilder can show a meaningful error screen.
+        rethrow;
+      }
+      // On native platforms google-services.json / GoogleService-Info.plist
+      // is the primary config source, so .env failure is non-fatal.
+    }
+
+    // Step 2: Check if Firebase is already initialized (e.g. hot-restart).
+    if (Firebase.apps.isNotEmpty) {
+      debugPrint('[STARTUP] Firebase already initialized — reusing');
+      _firebaseEnabled = true;
+      return;
+    }
+
+    // Step 3: Initialize Firebase.
+    try {
+      if (kIsWeb) {
+        _firebaseEnabled = FirebaseConfig.hasConfig;
+        if (!_firebaseEnabled) {
+          debugPrint('[STARTUP] No Firebase config found — skipping Firebase');
+          return;
+        }
+
+        debugPrint('[STARTUP] Initializing Firebase (web)...');
+        await Firebase.initializeApp(options: FirebaseConfig.options)
+            .timeout(const Duration(seconds: 5));
+        debugPrint('[STARTUP] Firebase (web) initialized');
+      } else {
+        debugPrint('[STARTUP] Initializing Firebase (native)...');
+        await Firebase.initializeApp()
+            .timeout(const Duration(seconds: 5));
+        _firebaseEnabled = true;
+        debugPrint('[STARTUP] Firebase (native) initialized');
+      }
+    } on TimeoutException {
+      debugPrint('[STARTUP] Firebase.initializeApp timed out after 5s');
+      _firebaseEnabled = false;
+    } catch (error) {
+      debugPrint('[STARTUP] Firebase.initializeApp failed: $error');
       _firebaseEnabled = false;
     }
   }
@@ -232,13 +293,55 @@ class _HomeRouteGateState extends State<_HomeRouteGate> {
   }
 }
 
-class _BootstrapLoadingScreen extends StatelessWidget {
+class _BootstrapLoadingScreen extends StatefulWidget {
   const _BootstrapLoadingScreen();
 
   @override
+  State<_BootstrapLoadingScreen> createState() =>
+      _BootstrapLoadingScreenState();
+}
+
+class _BootstrapLoadingScreenState extends State<_BootstrapLoadingScreen> {
+  bool _showSlowHint = false;
+  Timer? _hintTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // After 4 seconds, show a hint so the user knows it isn't frozen.
+    _hintTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() => _showSlowHint = true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _hintTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            if (_showSlowHint) ...[
+              const SizedBox(height: 20),
+              Text(
+                'Taking longer than expected…',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: NavTripPalette.mutedInk,
+                    ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

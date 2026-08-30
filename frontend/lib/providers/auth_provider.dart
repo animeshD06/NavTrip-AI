@@ -19,10 +19,11 @@ class AuthProvider extends ChangeNotifier {
         _authService!.authStateChanges.listen(_handleAuthStateChanged);
     _handleAuthStateChanged(_authService!.currentUser);
 
-    // Safety fallback: if auth state hasn't resolved after 10s, force ready
+    // Safety fallback: if auth state hasn't resolved after 5s, force ready
     // so the app doesn't hang on an infinite loading spinner.
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (!_isReady) {
+        debugPrint('[STARTUP] AuthProvider: 5s fallback fired — forcing ready');
         _isReady = true;
         notifyListeners();
       }
@@ -109,6 +110,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void _syncFromUser(firebase_auth.User? user) {
+    final wasReady = _isReady;
     _isReady = true;
     _currentUser = user == null ? null : AppUser.fromFirebase(user);
     _verificationMessage = user != null && user.emailVerified == false
@@ -117,6 +119,11 @@ class AuthProvider extends ChangeNotifier {
 
     if (_currentUser != null) {
       _errorMessage = null;
+    }
+
+    if (!wasReady) {
+      debugPrint('[STARTUP] AuthProvider: auth state resolved — '
+          'user=${user?.uid ?? 'null'}');
     }
 
     notifyListeners();

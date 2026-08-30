@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "776147368178",
+    "project_id": "navtrip-ai",
+    "storage_bucket": "navtrip-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:776147368178:android:7f4547a9090cbc8e2f786b",
+        "android_client_info": {
+          "package_name": "com.example.navtrip_ai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "776147368178-iqmj5ve10cr9elg2oe967uirsgls9696.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiEu2EDlzVi4hlEMhNZE9B7Aejwu5BYWY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "776147368178-9dmo4rigkn6ddp2jg6q6mp07emmtejc4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
