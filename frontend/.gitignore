@@ -1,4 +1,4 @@
-﻿# Miscellaneous
+# Miscellaneous
 *.class
 *.log
 *.pyc
@@ -46,4 +46,12 @@ app.*.map.json
 
 # Local auth config
 .env
+
+# Firebase credentials
+/android/app/google-services.json
+!/android/app/google-services.json.example
+**/ios/Runner/GoogleService-Info.plist
+!**/ios/Runner/GoogleService-Info.plist.example
+**/macos/Runner/GoogleService-Info.plist
+!**/macos/Runner/GoogleService-Info.plist.example
 

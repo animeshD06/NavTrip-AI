@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 .env
 inspo.mp4
 .DS_Store
@@ -20,4 +20,10 @@ build/
 .vscode/
 preview
 .pid
+
+# Firebase secrets
+**/google-services.json
+!**/google-services.json.example
+**/GoogleService-Info.plist
+!**/GoogleService-Info.plist.example
 

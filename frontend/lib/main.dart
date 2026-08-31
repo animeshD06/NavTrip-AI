@@ -99,17 +99,18 @@ class _NavTripAppState extends State<NavTripApp> {
 
     // Step 3: Initialize Firebase.
     try {
-      if (kIsWeb) {
+      if (kIsWeb || FirebaseConfig.hasConfig) {
         _firebaseEnabled = FirebaseConfig.hasConfig;
         if (!_firebaseEnabled) {
           debugPrint('[STARTUP] No Firebase config found — skipping Firebase');
           return;
         }
 
-        debugPrint('[STARTUP] Initializing Firebase (web)...');
+        debugPrint('[STARTUP] Initializing Firebase with options...');
         await Firebase.initializeApp(options: FirebaseConfig.options)
             .timeout(const Duration(seconds: 5));
-        debugPrint('[STARTUP] Firebase (web) initialized');
+        _firebaseEnabled = true;
+        debugPrint('[STARTUP] Firebase initialized');
       } else {
         debugPrint('[STARTUP] Initializing Firebase (native)...');
         await Firebase.initializeApp()

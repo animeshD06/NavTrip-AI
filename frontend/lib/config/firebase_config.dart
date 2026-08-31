@@ -12,17 +12,43 @@ class FirebaseConfig {
         '(${dotenv.env.length} entries)');
   }
 
+  static String get _platformApiKey {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      final key = dotenv.env['FIREBASE_ANDROID_API_KEY']?.trim();
+      if (key != null && key.isNotEmpty) return key;
+    } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      final key = dotenv.env['FIREBASE_IOS_API_KEY']?.trim();
+      if (key != null && key.isNotEmpty) return key;
+    }
+    return dotenv.env['FIREBASE_API_KEY']?.trim() ?? '';
+  }
+
+  static String get _platformAppId {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      final id = dotenv.env['FIREBASE_ANDROID_APP_ID']?.trim();
+      if (id != null && id.isNotEmpty) return id;
+    } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      final id = dotenv.env['FIREBASE_IOS_APP_ID']?.trim();
+      if (id != null && id.isNotEmpty) return id;
+    }
+    return dotenv.env['FIREBASE_APP_ID']?.trim() ?? '';
+  }
+
   static bool get hasConfig {
-    return _required('FIREBASE_API_KEY').isNotEmpty &&
-        _required('FIREBASE_APP_ID').isNotEmpty &&
+    return _platformApiKey.isNotEmpty &&
+        _platformAppId.isNotEmpty &&
         _required('FIREBASE_MESSAGING_SENDER_ID').isNotEmpty &&
         _required('FIREBASE_PROJECT_ID').isNotEmpty;
   }
 
   static FirebaseOptions get options {
     return FirebaseOptions(
-      apiKey: _required('FIREBASE_API_KEY'),
-      appId: _required('FIREBASE_APP_ID'),
+      apiKey: _platformApiKey.isNotEmpty
+          ? _platformApiKey
+          : _required('FIREBASE_API_KEY'),
+      appId: _platformAppId.isNotEmpty
+          ? _platformAppId
+          : _required('FIREBASE_APP_ID'),
       messagingSenderId: _required('FIREBASE_MESSAGING_SENDER_ID'),
       projectId: _required('FIREBASE_PROJECT_ID'),
       authDomain: _optional('FIREBASE_AUTH_DOMAIN'),
