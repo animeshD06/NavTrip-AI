@@ -42,13 +42,17 @@ class _StickyTripPlannerState extends State<StickyTripPlanner> {
   final _sectionKey = GlobalKey();
   late List<GlobalKey> _stepKeys;
   int _activeIndex = 0;
+  final ValueNotifier<double> _sidebarTopNotifier = ValueNotifier(0.0);
 
   @override
   void initState() {
     super.initState();
     _stepKeys = List.generate(widget.steps.length, (_) => GlobalKey());
     widget.scrollController.addListener(_handleScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _updateActiveStep());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateActiveStep();
+      _updateSidebarTop();
+    });
   }
 
   @override
@@ -66,13 +70,30 @@ class _StickyTripPlannerState extends State<StickyTripPlanner> {
   @override
   void dispose() {
     widget.scrollController.removeListener(_handleScroll);
+    _sidebarTopNotifier.dispose();
     super.dispose();
   }
 
   void _handleScroll() {
+    _updateSidebarTop();
     _updateActiveStep();
-    if (mounted) {
-      setState(() {});
+  }
+
+  void _updateSidebarTop() {
+    if (!mounted) return;
+    final renderObject = _sectionKey.currentContext?.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      final sectionTop = renderObject.localToGlobal(Offset.zero).dy;
+      final sectionHeight = renderObject.size.height;
+      const stickyInset = 84.0;
+      const panelHeight = 540.0;
+      final topWithinSection = -sectionTop + stickyInset;
+      final clampedTop = topWithinSection
+          .clamp(0.0, math.max(0.0, sectionHeight - panelHeight))
+          .toDouble();
+      if (_sidebarTopNotifier.value != clampedTop) {
+        _sidebarTopNotifier.value = clampedTop;
+      }
     }
   }
 
@@ -102,21 +123,6 @@ class _StickyTripPlannerState extends State<StickyTripPlanner> {
     }
   }
 
-  double _sidebarTop(BuildContext context) {
-    final renderObject = _sectionKey.currentContext?.findRenderObject();
-    if (renderObject is! RenderBox || !renderObject.hasSize) {
-      return 0;
-    }
-
-    final sectionTop = renderObject.localToGlobal(Offset.zero).dy;
-    final sectionHeight = renderObject.size.height;
-    const stickyInset = 84.0;
-    const panelHeight = 540.0;
-    final topWithinSection = -sectionTop + stickyInset;
-    return topWithinSection.clamp(
-        0.0, math.max(0.0, sectionHeight - panelHeight));
-  }
-
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
@@ -138,22 +144,30 @@ class _StickyTripPlannerState extends State<StickyTripPlanner> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 380),
-          child: Column(
-            children: [
-              for (var i = 0; i < widget.steps.length; i++)
-                _StepStoryPanel(
-                  key: _stepKeys[i],
-                  data: widget.steps[i],
-                  active: i == _activeIndex,
-                  index: i,
-                ),
-            ],
+          child: RepaintBoundary(
+            child: Column(
+              children: [
+                for (var i = 0; i < widget.steps.length; i++)
+                  _StepStoryPanel(
+                    key: _stepKeys[i],
+                    data: widget.steps[i],
+                    active: i == _activeIndex,
+                    index: i,
+                  ),
+              ],
+            ),
           ),
         ),
-        Positioned(
-          top: _sidebarTop(context),
-          left: 0,
-          width: 330,
+        AnimatedBuilder(
+          animation: _sidebarTopNotifier,
+          builder: (context, child) {
+            return Positioned(
+              top: _sidebarTopNotifier.value,
+              left: 0,
+              width: 330,
+              child: child!,
+            );
+          },
           child: _StickySidebar(
             steps: widget.steps,
             activeIndex: _activeIndex,

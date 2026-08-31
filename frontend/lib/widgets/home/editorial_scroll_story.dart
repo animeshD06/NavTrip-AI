@@ -134,13 +134,18 @@ class _EditorialHero extends StatelessWidget {
       color: Colors.white,
       padding: EdgeInsets.fromLTRB(
         mobile ? 20 : 72,
-        mobile ? 54 : 42,
+        mobile ? 36 : 42,
         mobile ? 20 : 72,
-        mobile ? 44 : 52,
+        mobile ? 64 : 80,
       ),
       child: Column(
         children: [
-          if (!mobile) const _LogoStrip(),
+          if (!mobile) ...[
+            const _LogoStrip(),
+            const SizedBox(height: 48),
+          ],
+          _IntroFooter(onPrimary: onPrimary, onExplore: onExplore),
+          SizedBox(height: mobile ? 56 : 96),
           LayoutBuilder(
             builder: (context, constraints) {
               final gap = mobile ? 12.0 : 34.0;
@@ -150,7 +155,7 @@ class _EditorialHero extends StatelessWidget {
               );
 
               return Padding(
-                padding: EdgeInsets.symmetric(vertical: mobile ? 28.0 : 48.0),
+                padding: EdgeInsets.only(bottom: mobile ? 20.0 : 32.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -189,7 +194,6 @@ class _EditorialHero extends StatelessWidget {
               );
             },
           ),
-          _IntroFooter(onPrimary: onPrimary, onExplore: onExplore),
         ],
       ),
     );

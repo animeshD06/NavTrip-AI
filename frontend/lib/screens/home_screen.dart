@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../theme/navtrip_theme.dart';
 import '../widgets/home/editorial_scroll_story.dart';
-import '../widgets/home/stack_scroll_section.dart';
 import '../widgets/home/sticky_trip_planner.dart';
 import '../widgets/home/trip_location_and_details_sheet.dart';
 
@@ -65,10 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       scrollController: _scrollController,
                       steps: _plannerSteps(),
                     ),
-                  ),
-                  StackScrollSection(
-                    cards: _testimonialCards(),
-                    scrollController: _scrollController,
                   ),
                   Container(
                     key: _destinationsKey,
@@ -158,56 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icons.flight_takeoff,
         ctaLabel: 'Start Planning',
         onCta: () => Navigator.of(context).pushNamed('/dashboard'),
-      ),
-    ];
-  }
-
-  List<StackCardData> _testimonialCards() {
-    return [
-      StackCardData(
-        badge: 'Explorer Review',
-        quote:
-            'NavTrip turned our chaotic wishlist into smooth, memorable days without any rushing.',
-        personName: 'Maya Rao',
-        role: 'Weekend Explorer',
-        company: 'Amalfi Coast Route',
-        image:
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuBAEXGXMZdRt9Qlfp1YXjUFUchOD7q0aHNBBCnRvcAuYkdoUCzeWjgKfpUH7_WtpKIWq8dvG1VM5W_O52FR9Q0g_nolife3sRwuNnYoQRQiWYbk44GMKwEFh7U5ffGv5BnnFAYd231PWxXpGqFkFpGzNFjwMETzYQY6ShT1bWqgxy6scPIwpMCC4cFQO_jCS1pM9Dg-odeFFuyLcfPcgI6Gn_q6_Ba9kXVl6jYoM4tdLLLQRsQqRhfEPOZANbTG5QVgKI1R7IRuu8JI',
-        primaryLabel: 'Explore Amalfi',
-        onPrimary: () => TripLocationAndDetailsSheet.show(
-          context,
-          initialDestination: 'The Amalfi Coast',
-        ),
-      ),
-      StackCardData(
-        badge: 'Smart Route Logic',
-        quote:
-            'The AI grouped nearby hidden gems so naturally that we discovered serene spots no generic travel blog mentioned.',
-        personName: 'Arjun Mehta',
-        role: 'Family Trip Planner',
-        company: 'Kyoto Cultural Trail',
-        image:
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuBhweeDqK7cfx6FGBKWhcAYPW9AkaPzgKU0rQc_AcZS4rODLP2sB9WdkWkj1yH-Y9xAAV4EXiyUDR99MubUQuqcJDOzAkH1_HmTnWg8QPEvnvVgeLjJrspwddE39R8j0n-21X1CSGuX2FWmd-TIJonqH1JVLb8hJWIRZg3cXfTbVtmWkD4vWcJG8kwTssPhkq8GvR5pxDLU6Z56Ot0N0zeMzWSOVtqCw2S0B-Fb5Sj7Saqccj3gtLTsVWASDa7_LTSWXH7SI8eMHyW7',
-        primaryLabel: 'Explore Kyoto',
-        onPrimary: () => TripLocationAndDetailsSheet.show(
-          context,
-          initialDestination: 'Kyoto Retreat',
-        ),
-      ),
-      StackCardData(
-        badge: 'Slow Travel',
-        quote:
-            'Balanced breathtaking fjord overlooks with cozy village cafe pauses. It genuinely felt like a journey curated by a close friend.',
-        personName: 'Leah Santos',
-        role: 'Solo Adventurer',
-        company: 'Norway Fjords',
-        image:
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuB6X-nbkrD2RuSThyypMSJ4dPWmB8NvsIlabOYZCea3JqcRawYtxt6qReBvly4mX6dddRBWAxZBF7OdS0oQ2-AAwZb0PtjK0vrTw9omWqoKElBsoBmjqNiXBdDv1_nahfFPp-aydiYMQ62R5d1dapegzrtoVZwdAFYLkoI8Ve1t9_uQ0EcwO7g53WQArUSNWylmcvS34ZdISCzZydb2aFbk36j_2F0G9uLyFK_4jtDdUFMi4L6SvSTx_dNqCMErGsQRW8Tsq47iMQfA',
-        primaryLabel: 'Explore Fjords',
-        onPrimary: () => TripLocationAndDetailsSheet.show(
-          context,
-          initialDestination: 'Fjord Hideaways',
-        ),
       ),
     ];
   }
@@ -386,20 +331,21 @@ class _DestinationCardState extends State<_DestinationCard> {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: () => TripLocationAndDetailsSheet.show(
-          context,
-          initialDestination: widget.title,
-        ),
-        child: AnimatedScale(
-          duration: const Duration(milliseconds: 200),
-          scale: _hovered ? 1.02 : 1,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+    return RepaintBoundary(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: () => TripLocationAndDetailsSheet.show(
+            context,
+            initialDestination: widget.title,
+          ),
+          child: AnimatedScale(
+            duration: const Duration(milliseconds: 200),
+            scale: _hovered ? 1.02 : 1,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -444,8 +390,9 @@ class _DestinationCardState extends State<_DestinationCard> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _Footer extends StatelessWidget {
