@@ -23,6 +23,41 @@ class EditorialScrollStory extends StatefulWidget {
 
 class _EditorialScrollStoryState extends State<EditorialScrollStory> {
   final _key = GlobalKey();
+  final ValueNotifier<double> _heroProgress = ValueNotifier(0.0);
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_syncProgress);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncProgress());
+  }
+
+  @override
+  void didUpdateWidget(covariant EditorialScrollStory oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController != widget.scrollController) {
+      oldWidget.scrollController.removeListener(_syncProgress);
+      widget.scrollController.addListener(_syncProgress);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_syncProgress);
+    _heroProgress.dispose();
+    super.dispose();
+  }
+
+  void _syncProgress() {
+    if (!mounted) return;
+    if (widget.scrollController.hasClients) {
+      final offset = widget.scrollController.offset;
+      final progress = (offset / 320.0).clamp(0.0, 1.0);
+      if ((_heroProgress.value - progress).abs() > 0.001) {
+        _heroProgress.value = progress;
+      }
+    }
+  }
 
   List<StackCardData> _buildStoryCards() {
     return [
@@ -95,7 +130,7 @@ class _EditorialScrollStoryState extends State<EditorialScrollStory> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _EditorialHero(
-            progress: 0,
+            progressNotifier: _heroProgress,
             mobile: mobile,
             onPrimary: widget.onPrimary,
             onExplore: widget.onExplore,
@@ -112,13 +147,13 @@ class _EditorialScrollStoryState extends State<EditorialScrollStory> {
 
 class _EditorialHero extends StatelessWidget {
   const _EditorialHero({
-    required this.progress,
+    required this.progressNotifier,
     required this.mobile,
     required this.onPrimary,
     required this.onExplore,
   });
 
-  final double progress;
+  final ValueNotifier<double> progressNotifier;
   final bool mobile;
   final VoidCallback onPrimary;
   final VoidCallback onExplore;
@@ -128,7 +163,6 @@ class _EditorialHero extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     final heroSize = mobile ? 44.0 : (width * 0.082).clamp(72.0, 118.0);
     final ringSize = mobile ? 64.0 : 96.0;
-    final ringScale = 1.0 + progress * 0.26;
 
     return Container(
       color: Colors.white,
@@ -153,43 +187,57 @@ class _EditorialHero extends StatelessWidget {
                 88.0,
                 (constraints.maxWidth - ringSize - gap * 2) / 2,
               );
+              final maxShift =
+                  mobile ? 48.0 : math.min(130.0, sideWidth * 0.55);
 
               return Padding(
                 padding: EdgeInsets.only(bottom: mobile ? 20.0 : 32.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Transform.translate(
-                      offset: Offset(-72 * progress, 0),
-                      child: _HeroWordSlot(
-                        width: sideWidth,
-                        alignment: Alignment.centerRight,
-                        text: 'Born',
-                        size: heroSize,
-                      ),
-                    ),
-                    SizedBox(width: gap),
-                    Transform.scale(
-                      scale: ringScale,
-                      child: OrbitDots(
-                        dotCount: 10,
-                        size: ringSize,
-                        radius: mobile ? 24 : 34,
-                        dotSize: mobile ? 6.5 : 8.5,
-                        dotColor: NavTripEditorial.navy,
-                      ),
-                    ),
-                    SizedBox(width: gap),
-                    Transform.translate(
-                      offset: Offset(72 * progress, 0),
-                      child: _HeroWordSlot(
-                        width: sideWidth,
-                        alignment: Alignment.centerLeft,
-                        text: 'to Travel.',
-                        size: heroSize,
-                      ),
-                    ),
-                  ],
+                child: RepaintBoundary(
+                  child: AnimatedBuilder(
+                    animation: progressNotifier,
+                    builder: (context, child) {
+                      final progress = progressNotifier.value;
+                      final curved = Curves.easeOutCubic.transform(progress);
+                      final shift = maxShift * curved;
+                      final ringScale = 1.0 + curved * 0.20;
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Transform.translate(
+                            offset: Offset(-shift, 0),
+                            child: _HeroWordSlot(
+                              width: sideWidth,
+                              alignment: Alignment.centerRight,
+                              text: 'Born',
+                              size: heroSize,
+                            ),
+                          ),
+                          SizedBox(width: gap),
+                          Transform.scale(
+                            scale: ringScale,
+                            child: OrbitDots(
+                              dotCount: 10,
+                              size: ringSize,
+                              radius: mobile ? 24 : 34,
+                              dotSize: mobile ? 6.5 : 8.5,
+                              dotColor: NavTripEditorial.navy,
+                            ),
+                          ),
+                          SizedBox(width: gap),
+                          Transform.translate(
+                            offset: Offset(shift, 0),
+                            child: _HeroWordSlot(
+                              width: sideWidth,
+                              alignment: Alignment.centerLeft,
+                              text: 'to Travel.',
+                              size: heroSize,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               );
             },
