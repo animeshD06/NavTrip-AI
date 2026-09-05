@@ -1,7 +1,14 @@
 import { buildItinerary } from '../services/itineraries.service.js';
 import { findItineraryByTripId } from '../services/trips.service.js';
 import { sendError } from '../utils/http.js';
-import { parsePositiveInteger, requireString } from '../utils/validation.js';
+import {
+  parseEnum,
+  parseOptionalInteger,
+  parseOptionalMoney,
+  parsePositiveInteger,
+  parseStringArray,
+  requireString,
+} from '../utils/validation.js';
 
 export async function generateItinerary(req, res, next) {
   try {
@@ -12,6 +19,15 @@ export async function generateItinerary(req, res, next) {
       destination,
       days,
       category,
+      interests: parseStringArray(req.body.interests, 'interests'),
+      travelStyle: parseEnum(
+        req.body.travelStyle,
+        'travelStyle',
+        ['relaxed', 'balanced', 'moderate', 'packed'],
+        'balanced',
+      ),
+      groupSize: parseOptionalInteger(req.body.groupSize, 'groupSize', { min: 1, max: 20 }),
+      budget: parseOptionalMoney(req.body.budget, 'budget'),
     });
 
     return res.json({ data: itinerary });
