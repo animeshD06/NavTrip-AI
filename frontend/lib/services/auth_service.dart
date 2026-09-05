@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 
@@ -53,6 +54,13 @@ class AuthService {
   }
 
   Future<firebase_auth.UserCredential> signInWithGoogle() async {
+    if (kIsWeb) {
+      final googleProvider = firebase_auth.GoogleAuthProvider();
+      googleProvider.addScope('email');
+      googleProvider.addScope('profile');
+      return _auth.signInWithPopup(googleProvider);
+    }
+
     final googleSignIn = GoogleSignIn(scopes: <String>['email', 'profile']);
     final googleUser = await googleSignIn.signIn();
     if (googleUser == null) {
@@ -72,10 +80,14 @@ class AuthService {
   }
 
   Future<void> signOut() async {
-    await Future.wait([
-      _auth.signOut(),
-      GoogleSignIn().signOut(),
-    ]);
+    if (kIsWeb) {
+      await _auth.signOut();
+    } else {
+      await Future.wait([
+        _auth.signOut(),
+        GoogleSignIn().signOut(),
+      ]);
+    }
   }
 
   Future<void> handleDeepLink(Uri uri) async {

@@ -155,7 +155,8 @@ class AuthProvider extends ChangeNotifier {
     }
 
     if (error is firebase_auth.FirebaseAuthException) {
-      final code = error.code.toLowerCase();
+      final rawCode = error.code.toLowerCase();
+      final code = rawCode.startsWith('auth/') ? rawCode.substring(5) : rawCode;
       final message = (error.message ?? '').trim();
 
       switch (code) {
@@ -164,7 +165,7 @@ class AuthProvider extends ChangeNotifier {
         case 'invalid-email':
           return 'Enter a valid email address.';
         case 'weak-password':
-          return 'Use a stronger password.';
+          return 'Use a stronger password (at least 6 characters).';
         case 'user-not-found':
           return 'We could not find an account for that email.';
         case 'wrong-password':
@@ -175,6 +176,12 @@ class AuthProvider extends ChangeNotifier {
         case 'popup-closed-by-user':
         case 'cancelled-popup-request':
           return 'Google sign-in was cancelled.';
+        case 'popup-blocked':
+          return 'Sign-in popup was blocked by your browser. Please allow popups for this site.';
+        case 'operation-not-allowed':
+          return 'This sign-in provider is not enabled in Firebase Console.';
+        case 'unauthorized-domain':
+          return 'This domain is not authorized in Firebase Console.';
         case 'account-exists-with-different-credential':
           return 'That account already exists with a different sign-in method.';
         default:

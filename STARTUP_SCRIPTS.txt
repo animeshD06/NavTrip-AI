@@ -9,14 +9,19 @@ cd frontend
 ..\run_frontend.bat
 
 Docker full stack:
-docker compose --env-file .env.docker.example up --build
+docker compose --env-file .env.docker up --build -d
+# or simply:
+docker compose up --build -d
 
 Docker database setup:
-docker compose --env-file .env.docker.example run --rm migrate
+docker compose --env-file .env.docker run --rm migrate
 
 Docker useful checks:
-docker compose --env-file .env.docker.example build
-docker compose --env-file .env.docker.example run --rm backend npm test
+docker compose --env-file .env.docker build
+docker compose --env-file .env.docker run --rm backend npm test
+
+recreate:
+docker compose up --build --force-recreate -d
 
 Docker URLs:
 Frontend: http://localhost:8002
