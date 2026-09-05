@@ -1,10 +1,16 @@
 node_modules/
 .env
+.env.docker
+.env.*
+!.env.example
+!.env.docker.example
+inspo.mp4
 .DS_Store
 *.log
 tools/flutter/
 *.pid
 *.md
+!docs/*.md
 
 # Flutter/Dart
 .dart_tool/
@@ -18,3 +24,10 @@ build/
 .vscode/
 preview
 .pid
+
+# Firebase secrets
+**/google-services.json
+!**/google-services.json.example
+**/GoogleService-Info.plist
+!**/GoogleService-Info.plist.example
+

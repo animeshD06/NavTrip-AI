@@ -1,5 +1,5 @@
-import cors from 'cors';
 import express from 'express';
+import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
@@ -26,11 +26,32 @@ import { httpError, sendError } from './utils/http.js';
 
 const app = express();
 
+function isLoopbackOrigin(origin) {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]' || hostname === '::1';
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedOrigin(origin) {
+  if (!origin || env.corsOrigins.length === 0) {
+    return true;
+  }
+
+  if (env.nodeEnv !== 'production' && isLoopbackOrigin(origin)) {
+    return true;
+  }
+
+  return env.corsOrigins.includes(origin);
+}
+
 app.use(helmet());
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || env.corsOrigins.length === 0 || env.corsOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 

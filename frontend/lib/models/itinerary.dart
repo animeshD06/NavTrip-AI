@@ -13,13 +13,22 @@ class Itinerary {
 
   factory Itinerary.fromJson(Map<String, dynamic> json) {
     return Itinerary(
-      destination: json['destination'] as String,
-      days: (json['days'] as List<dynamic>)
+      destination: json['destination'] as String? ?? '',
+      days: (json['days'] as List<dynamic>? ?? [])
           .map((item) => ItineraryDay.fromJson(item as Map<String, dynamic>))
           .toList(),
       totalPlaces: json['totalPlaces'] as int? ?? 0,
       generatedBy: json['generatedBy'] as String? ?? 'rule-based',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'destination': destination,
+      'days': days.map((day) => day.toJson()).toList(),
+      'totalPlaces': totalPlaces,
+      'generatedBy': generatedBy,
+    };
   }
 }
 
@@ -39,6 +48,13 @@ class ItineraryDay {
           .map((item) => ItineraryPlace.fromJson(item as Map<String, dynamic>))
           .toList(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'dayNumber': dayNumber,
+      'places': places.map((place) => place.toJson()).toList(),
+    };
   }
 }
 
@@ -83,5 +99,21 @@ class ItineraryPlace {
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'placeId': placeId,
+      'name': name,
+      'category': category,
+      'sequenceOrder': sequenceOrder,
+      'estimatedVisitMinutes': estimatedVisitMinutes,
+      'estimatedTravelMinutes': estimatedTravelMinutes,
+      'travelDistanceKm': travelDistanceKm,
+      'openingTime': openingTime,
+      'closingTime': closingTime,
+      'latitude': latitude,
+      'longitude': longitude,
+    };
   }
 }

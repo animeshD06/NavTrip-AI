@@ -1,0 +1,35 @@
+NavTrip AI startup scripts
+
+Backend:
+cd backend
+node src/server.js
+
+Frontend:
+cd frontend
+..\run_frontend.bat
+
+Docker full stack:
+docker compose --env-file .env.docker up --build -d
+# or simply:
+docker compose up --build -d
+
+Docker database setup:
+docker compose --env-file .env.docker run --rm migrate
+
+Docker useful checks:
+docker compose --env-file .env.docker build
+docker compose --env-file .env.docker run --rm backend npm test
+
+recreate:
+docker compose up --build --force-recreate -d
+
+Docker URLs:
+Frontend: http://localhost:8002
+Backend health: http://localhost:4000/api/health
+
+Notes:
+- Backend defaults to the Node server entrypoint defined in backend/package.json.
+- Frontend is a Flutter app, so run it with the local Flutter SDK bundled in tools/flutter.
+- run_frontend.ps1 temporarily maps the repo to a drive letter so Flutter avoids the space-in-path issue on Windows.
+- Docker commands require Docker Desktop's Linux engine to be running.
+- Fill FIREBASE_* values in a local Docker env file before building the frontend image if you want Firebase startup to succeed.
