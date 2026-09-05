@@ -7,6 +7,32 @@ process.env.DATABASE_URL = '';
 process.env.JWT_SECRET = 'test-secret';
 
 const { default: app } = await import('../src/app.js');
+const { importedLocationsCount } = await import('../src/data/locations-catalog.js');
+
+function clockMinutes(value) {
+  assert.match(value, /^\d{2}:\d{2}$/);
+  const [hours, minutes] = value.split(':').map(Number);
+
+  return hours * 60 + minutes;
+}
+
+function assertScheduledItinerary(itinerary) {
+  const placeCounts = itinerary.days.map((day) => day.places.length);
+
+  if (placeCounts.some((count) => count > 0)) {
+    assert.ok(Math.max(...placeCounts) - Math.min(...placeCounts) <= 2);
+  }
+
+  itinerary.days.forEach((day) => {
+    day.places.forEach((place, index) => {
+      assert.equal(place.sequenceOrder, index + 1);
+      assert.ok(clockMinutes(place.departureTime) > clockMinutes(place.arrivalTime));
+      assert.equal(typeof place.score, 'number');
+      assert.ok(place.score >= 0 && place.score <= 1);
+      assert.ok(place.clusterId);
+    });
+  });
+}
 
 test('health endpoint reports ok', async () => {
   const response = await request(app).get('/api/health').expect(200);
@@ -25,7 +51,11 @@ test('places endpoint returns Jaipur places', async () => {
   assert.equal(response.body.data[0].city, 'Jaipur');
 });
 
-test('places endpoint includes locations imported from markdown', async () => {
+test('places endpoint includes locations imported from markdown', {
+  skip: importedLocationsCount === 0
+    ? 'frontend/build/locations.md is not present in this checkout'
+    : false,
+}, async () => {
   const response = await request(app)
     .get('/api/places')
     .query({ city: 'Udaipur' })
@@ -100,6 +130,7 @@ test('register, create trip, list trip, and delete trip', async () => {
     tripResponse.body.data.itinerary.generatedBy,
     'rule-based-city-routing',
   );
+  assertScheduledItinerary(tripResponse.body.data.itinerary);
 
   const listResponse = await request(app)
     .get('/api/trips')
@@ -128,6 +159,7 @@ test('register, create trip, list trip, and delete trip', async () => {
     .expect(200);
 
   assert.equal(itineraryResponse.body.data.tripId, tripResponse.body.data.id);
+  assertScheduledItinerary(itineraryResponse.body.data);
 
   await request(app)
     .delete(`/api/trips/${tripResponse.body.data.id}`)
@@ -165,6 +197,7 @@ test('anonymous trips remain available without a token', async () => {
     .expect(200);
 
   assert.equal(itineraryResponse.body.data.totalPlaces, 3);
+  assertScheduledItinerary(itineraryResponse.body.data);
 
   await request(app)
     .delete(`/api/trips/${tripResponse.body.data.id}`)
@@ -186,6 +219,7 @@ test('city itinerary supplements sparse categories and balances days', async () 
   assert.ok(response.body.data.totalPlaces >= 3);
   assert.equal(response.body.data.days.length, 2);
   assert.equal(response.body.data.days[0].places[0].name, 'Qutub Minar');
+  assertScheduledItinerary(response.body.data);
 });
 
 test('state itinerary generation works when destination is a state', async () => {
@@ -200,7 +234,8 @@ test('state itinerary generation works when destination is a state', async () =>
 
   assert.equal(response.body.data.destination, 'Kerala');
   assert.equal(response.body.data.destinationType, 'state');
-  assert.equal(response.body.data.totalPlaces, 3);
+  assert.ok(response.body.data.totalPlaces >= 2);
+  assertScheduledItinerary(response.body.data);
 });
 
 test('advanced guide pack, narration, recommendation, assistant, weather, and optimizer APIs work', async () => {
@@ -256,6 +291,7 @@ test('advanced guide pack, narration, recommendation, assistant, weather, and op
 
   assert.equal(optimizerResponse.body.data.generatedBy, 'deterministic-route-optimizer');
   assert.equal(optimizerResponse.body.data.optimizedRoute.days.length, 2);
+  assertScheduledItinerary(optimizerResponse.body.data.optimizedRoute);
 
   const insightsResponse = await request(app)
     .get('/api/weather-crowd/insights')

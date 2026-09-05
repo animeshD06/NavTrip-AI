@@ -18,6 +18,10 @@ export async function optimizeItinerary({
     destination,
     days,
     category: preferredCategory,
+    interests,
+    travelStyle,
+    groupSize,
+    budget,
   });
 
   const optimizedDays = itinerary.days.map((day) => ({

@@ -6,8 +6,11 @@ import {
 } from '../services/trips.service.js';
 import { sendError } from '../utils/http.js';
 import {
+  parseEnum,
+  parseOptionalInteger,
   parseOptionalMoney,
   parsePositiveInteger,
+  parseStringArray,
   requireString,
 } from '../utils/validation.js';
 
@@ -29,6 +32,14 @@ export async function createTrip(req, res, next) {
       days,
       category,
       budget: parseOptionalMoney(req.body.budget, 'budget'),
+      interests: parseStringArray(req.body.interests, 'interests'),
+      travelStyle: parseEnum(
+        req.body.travelStyle,
+        'travelStyle',
+        ['relaxed', 'balanced', 'moderate', 'packed'],
+        'balanced',
+      ),
+      groupSize: parseOptionalInteger(req.body.groupSize, 'groupSize', { min: 1, max: 20 }),
       userId: req.user?.sub,
     });
 

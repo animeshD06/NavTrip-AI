@@ -26,9 +26,20 @@ export async function createTripWithItinerary({
   days,
   category,
   budget,
+  interests,
+  travelStyle,
+  groupSize,
   userId,
 }) {
-  const itinerary = await buildItinerary({ destination, days, category });
+  const itinerary = await buildItinerary({
+    destination,
+    days,
+    category,
+    budget,
+    interests,
+    travelStyle,
+    groupSize,
+  });
 
   if (hasDatabaseConfig()) {
     return createTripInDatabase({
